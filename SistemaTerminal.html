@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sistema Terminal</title>
+<style>
+/* ── Reset ── */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Segoe UI', Arial, sans-serif; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
+
+/* ── Telas ── */
+.sc { display: none; -webkit-flex-direction: column; flex-direction: column; width: 100%; height: 100%; overflow: hidden; }
+.sc.on { display: -webkit-flex; display: flex; }
+
+/* ── Scroll helper ── */
+.scroll-y { overflow-y: auto; -webkit-overflow-scrolling: touch; -webkit-flex: 1; flex: 1; }
+
+/* ══════════ HEADERS ══════════ */
+.hdr-blue {
+  background: #1565C0; color: #FFF;
+  padding: 10px 12px;
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  min-height: 72px; -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.hdr-blue .logo {
+  width: 64px; height: 50px; background: #FFF; border-radius: 4px;
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  font-size: 9px; font-weight: 900; color: #1565C0;
+  text-align: center; line-height: 1.3; padding: 4px;
+  -webkit-flex-shrink: 0; flex-shrink: 0; margin-right: 12px;
+}
+.hdr-blue .info { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; }
+.hdr-blue .info .name { font-size: 14px; font-weight: 700; }
+.hdr-blue .info span  { font-size: 12px; color: #90CAF9; margin-top: 2px; }
+
+.hdr-green {
+  background: #4CAF50; color: #FFF;
+  height: 50px; padding: 0 14px;
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: space-between; justify-content: space-between;
+  font-size: 17px; font-weight: 700;
+  -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.hdr-green .back { background: none; border: none; color: #FFF; font-size: 26px; cursor: pointer; padding: 0 8px 0 0; }
+
+.hdr-date {
+  background: #1565C0; color: #FFF;
+  height: 54px;
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  font-size: 22px; font-weight: 700; letter-spacing: 2px;
+  -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+
+.hdr-resumo { background: #1565C0; padding: 12px; text-align: center; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.hdr-resumo .lbl { font-size: 13px; color: #90CAF9; }
+.hdr-resumo .val { font-size: 30px; font-weight: 700; color: #A5D6A7; }
+
+/* ══════════ LOGIN ══════════ */
+.login-body {
+  -webkit-flex: 1; flex: 1;
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: column; flex-direction: column;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  padding: 32px 24px; background: #F0F4F8;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.login-logo {
+  width: 90px; height: 70px; background: #1565C0; border-radius: 8px;
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  font-size: 11px; color: #FFF; font-weight: 900;
+  text-align: center; line-height: 1.4; margin-bottom: 24px;
+}
+.login-title { font-size: 20px; font-weight: 700; color: #1565C0; margin-bottom: 4px; }
+.login-sub   { font-size: 13px; color: #888; margin-bottom: 24px; }
+.login-label { font-size: 13px; font-weight: 600; color: #444; margin-bottom: 5px; width: 100%; text-align: left; }
+.login-inp   {
+  width: 100%; height: 50px; border: 1.5px solid #CCC; border-radius: 8px;
+  padding: 0 14px; font-size: 16px; margin-bottom: 14px; outline: none; background: #FFF;
+  -webkit-appearance: none;
+}
+.login-inp:focus { border-color: #1565C0; }
+.btn-login {
+  width: 100%; height: 52px; background: #388E3C; color: #FFF;
+  border: none; border-radius: 8px; font-size: 17px; font-weight: 700; cursor: pointer;
+  margin-top: 8px;
+}
+.btn-login:active { background: #2E7D32; }
+.login-err { width: 100%; text-align: center; color: #E53935; font-size: 13px; min-height: 22px; margin-top: 10px; }
+
+/* ══════════ MAIN ══════════ */
+.btn-vender {
+  display: block; margin: 12px; width: calc(100% - 24px);
+  height: 68px; background: #388E3C; color: #FFF;
+  border: none; border-radius: 8px; font-size: 22px; font-weight: 700; cursor: pointer;
+  -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.btn-vender:active { background: #2E7D32; }
+
+.menu-grid {
+  display: -webkit-flex; display: flex;
+  -webkit-flex-wrap: wrap; flex-wrap: wrap;
+  padding: 0 12px; -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.btn-mn {
+  width: 50%; height: 80px;
+  border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; color: #FFF;
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: column; flex-direction: column;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  padding: 4px;
+}
+/* simulate gap with border */
+.btn-mn { border: 4px solid #FFF; border-radius: 8px; }
+.btn-mn:active { opacity: .85; }
+.mn-ico { font-size: 24px; margin-bottom: 4px; }
+.sair { text-align: center; color: #1565C0; font-size: 17px; font-weight: 700; padding: 14px; cursor: pointer; text-decoration: underline; }
+.ver  { text-align: center; color: #999; font-size: 12px; padding-bottom: 10px; }
+
+/* ══════════ LISTAS ══════════ */
+.lst-pad { padding: 10px; }
+.btn-ext, .btn-tipo {
+  display: -webkit-flex; display: flex;
+  -webkit-justify-content: space-between; justify-content: space-between;
+  -webkit-align-items: center; align-items: center;
+  width: 100%; padding: 15px 14px; margin-bottom: 7px;
+  border: none; border-radius: 7px;
+  font-size: 16px; font-weight: 500; color: #FFF; cursor: pointer;
+}
+.btn-ext  { background: #42A5F5; }
+.btn-ext:active  { background: #1976D2; }
+.btn-tipo { background: #1E88E5; }
+.btn-tipo:active { background: #1565C0; }
+.grp-lbl {
+  font-size: 11px; font-weight: 700; color: #1565C0;
+  padding: 8px 4px 4px; letter-spacing: .5px; text-transform: uppercase;
+  border-bottom: 1px solid #BBDEFB; margin-bottom: 6px;
+}
+.msg-load { text-align: center; color: #888; padding: 24px; font-size: 14px; }
+.msg-err  { text-align: center; color: #E53935; padding: 20px; font-size: 14px; line-height: 1.6; }
+
+/* ══════════ GRUPO ══════════ */
+.g-display {
+  background: #F5F5F5; height: 58px;
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  font-size: 22px; font-weight: 700; color: #212121;
+  letter-spacing: 8px; border-bottom: 1px solid #DDD;
+  -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.g-cnt { background: rgba(255,255,255,.22); border-radius: 12px; padding: 2px 10px; font-size: 14px; font-weight: 600; }
+.g-body { display: -webkit-flex; display: flex; -webkit-flex: 1; flex: 1; overflow: hidden; }
+
+.animais-wrap { -webkit-flex: 1; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.grid-an {
+  display: -webkit-flex; display: flex;
+  -webkit-flex-wrap: wrap; flex-wrap: wrap;
+  background: #BDBDBD; padding: 1px;
+}
+.btn-an {
+  width: 20%; background: #FFF; border: none; cursor: pointer;
+  text-align: center; padding: 2px;
+  min-height: 64px;
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: column; flex-direction: column;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  border: 1px solid #BDBDBD;
+}
+.btn-an:active, .btn-an.sel { background: #BBDEFB; }
+.an-em { font-size: 20px; line-height: 1; }
+.an-dz { font-size: 8px; color: #777; }
+.an-nm { font-size: 9px; font-weight: 700; color: #333; }
+
+/* ══════════ SIDEBAR ══════════ */
+.sidebar { width: 60px; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.s-del { -webkit-flex: 1; flex: 1; background: #F57C00; border: none; color: #FFF; font-size: 24px; cursor: pointer; }
+.s-lmp { -webkit-flex: 1; flex: 1; background: #1565C0; border: none; color: #FFF; font-size: 22px; cursor: pointer; }
+.s-ok  { -webkit-flex: 2; flex: 2; background: #388E3C; border: none; color: #FFF; font-size: 32px; cursor: pointer; }
+.s-del:active, .s-lmp:active, .s-ok:active { opacity: .85; }
+
+/* ══════════ TECLADO NÚMEROS ══════════ */
+.n-instr { text-align: center; color: #888; font-size: 13px; padding: 6px 0; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.n-disp  { text-align: center; font-size: 34px; font-weight: 700; color: #1565C0; padding: 6px; letter-spacing: 6px; -webkit-flex-shrink: 0; flex-shrink: 0; min-height: 52px; }
+/* lista de palpites confirmados */
+.n-lista-wrap {
+  -webkit-flex: 1; flex: 1;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 10px 12px; background: #F5F5F5;
+  border-bottom: 1px solid #DDD;
+  font-size: 22px; font-weight: 700;
+  color: #1565C0; letter-spacing: 4px; line-height: 1.85;
+  word-break: break-all;
+}
+.n-chip { display: none; }
+.n-chip-del { display: none; }
+/* Barra JBet: Prêmio / palpites / ✕ */
+.jbet-info {
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  background: #c8c8c8; padding: 6px 10px;
+  border-top: 1px solid #aaa; -webkit-flex-shrink: 0; flex-shrink: 0;
+  gap: 8px;
+}
+.jbi-box {
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: column; flex-direction: column;
+  -webkit-align-items: center; align-items: center;
+  background: #fff; border-radius: 5px;
+  padding: 2px 8px; min-width: 52px;
+}
+.jbi-lbl { font-size: 10px; color: #666; font-weight: 600; text-transform: uppercase; }
+.jbi-val { font-size: 18px; font-weight: 700; color: #212121; line-height: 1.2; }
+.jbi-sep { font-size: 13px; color: #666; font-weight: 600; }
+.jbi-del { background: #E53935; border: none; color: #fff;
+  border-radius: 50%; width: 38px; height: 38px; font-size: 18px;
+  cursor: pointer; display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center; }
+.jbet-formula {
+  background: #E8F5E9; color: #2E7D32;
+  text-align: center; font-size: 13px; font-weight: 700;
+  padding: 5px; -webkit-flex-shrink: 0; flex-shrink: 0;
+  letter-spacing: .5px;
+}
+
+.teclado-row { display: -webkit-flex; display: flex; -webkit-flex-shrink: 0; flex-shrink: 0; height: 260px; }
+.numpad {
+  -webkit-flex: 3; flex: 3;
+  display: -webkit-flex; display: flex;
+  -webkit-flex-wrap: wrap; flex-wrap: wrap;
+  background: #CCC; padding: 1px;
+}
+.k {
+  width: 33.333%; background: #FAFAFA; border: 1px solid #CCC;
+  font-size: 22px; font-weight: 700; color: #212121; cursor: pointer;
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+}
+.k:active { background: #BDBDBD; }
+.k.empty  { background: #ECECEC; cursor: default; }
+.ks { -webkit-flex: 1; flex: 1; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; background: #CCC; padding: 1px; }
+.k-del { -webkit-flex: 1; flex: 1; background: #F57C00; border: none; color: #FFF; font-size: 24px; cursor: pointer; }
+.k-ok  { -webkit-flex: 3; flex: 3; background: #388E3C; border: none; color: #FFF; font-size: 30px; cursor: pointer; }
+.k-del:active, .k-ok:active { opacity: .85; }
+.k-ok.dim { opacity: .35; pointer-events: none; }
+
+/* ══════════ TECLADO VALOR ══════════ */
+.v-mm   { text-align: center; color: #888; font-size: 13px; padding: 6px; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.v-disp { text-align: center; font-size: 40px; font-weight: 700; color: #212121; padding: 4px; -webkit-flex-shrink: 0; flex-shrink: 0; min-height: 56px; }
+.modo-row {
+  display: -webkit-flex; display: flex;
+  padding: 8px 12px; height: 72px; -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.btn-modo {
+  -webkit-flex: 1; flex: 1; border: none; border-radius: 8px; cursor: pointer;
+  font-size: 11px; font-weight: 700; color: #FFF; line-height: 1.6; padding: 4px;
+}
+.btn-modo + .btn-modo { margin-left: 8px; }
+.m-on  { background: #388E3C; }
+.m-off { background: #9E9E9E; }
+
+/* ══════════ RESUMO ══════════ */
+.rsm-exts {
+  font-size: 12px; color: #555; padding: 8px 12px;
+  border-bottom: 1px solid #EEE; white-space: pre-wrap;
+  -webkit-flex-shrink: 0; flex-shrink: 0; background: #F9F9F9;
+}
+.ap-item {
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  padding: 10px 12px; border-bottom: 1px solid #EEE;
+}
+.ap-info { -webkit-flex: 1; flex: 1; font-size: 13px; color: #333; line-height: 1.8; }
+.ap-info strong { display: block; font-size: 14px; color: #1565C0; }
+.btn-del-ap { background: none; border: none; font-size: 24px; cursor: pointer; color: #E53935; padding: 2px 4px; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.rsm-vz {
+  -webkit-flex: 1; flex: 1;
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  color: #AAA; font-size: 15px; text-align: center; padding: 30px; line-height: 1.8;
+}
+.rsm-foot { display: -webkit-flex; display: flex; height: 56px; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.rsm-foot button { -webkit-flex: 1; flex: 1; border: none; font-size: 15px; font-weight: 700; color: #FFF; cursor: pointer; }
+.rsm-foot button:active { opacity: .85; }
+.f-nb { background: #1565C0; }
+.f-ca { background: #E53935; }
+.f-fi { background: #388E3C; }
+.f-fi:disabled { background: #9E9E9E; }
+
+/* ══════════ DIALOG ══════════ */
+.dlg-bg {
+  display: none; position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;  /* Chrome 83: sem inset */
+  background: rgba(0,0,0,.55);
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  z-index: 20;
+}
+.dlg-bg.on { display: -webkit-flex; display: flex; }
+.dlg { background: #FFF; border-radius: 8px; padding: 22px 20px 14px; margin: 24px; min-width: 260px; }
+.dlg-title { font-size: 17px; font-weight: 700; color: #212121; margin-bottom: 8px; }
+.dlg-msg   { font-size: 14px; color: #555; margin-bottom: 18px; line-height: 1.5; }
+.dlg-btns  { display: -webkit-flex; display: flex; -webkit-justify-content: flex-end; justify-content: flex-end; }
+.dlg-btns button { background: none; border: none; font-size: 14px; font-weight: 700; color: #1565C0; cursor: pointer; padding: 4px 8px; letter-spacing: .5px; text-transform: uppercase; }
+
+/* ══════════ TICKET ══════════ */
+.ticket-dlg  { background: #FFF; border-radius: 8px; padding: 14px 14px 10px; margin: 12px; width: calc(100% - 24px); max-height: 92vh; overflow-y: auto; }
+.ticket-hdr  { text-align: center; font-size: 13px; color: #388E3C; font-weight: 700; margin-bottom: 8px; }
+.ticket-pre  { font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.55; white-space: pre; background: #FAFAFA; border: 1px dashed #CCC; border-radius: 6px; padding: 10px 8px; margin-bottom: 10px; overflow-x: auto; color: #212121; }
+.ticket-btns { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 8px; }
+.btn-ok-tk   { width: 100%; height: 46px; background: #1565C0; color: #FFF; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
+
+/* ══════════ BARRA JBET VALOR ══════════ */
+.jbet-val-bar {
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: stretch; align-items: stretch;
+  background: #c8c8c8; border-bottom: 1px solid #aaa;
+  -webkit-flex-shrink: 0; flex-shrink: 0;
+  height: 70px;
+}
+.jvb-box {
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: column; flex-direction: column;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  padding: 4px 8px; min-width: 70px;
+}
+.jvb-lbl { font-size: 10px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: .4px; }
+.jvb-num { font-size: 22px; font-weight: 700; color: #1a1a1a; line-height: 1.15; }
+.jvb-sep { width: 1px; background: #aaa; margin: 8px 0; -webkit-align-self: stretch; align-self: stretch; }
+.jvb-ou  { font-size: 11px; color: #666; font-weight: 600; padding: 0 4px; -webkit-align-self: center; align-self: center; }
+.jvb-total { background: #3a3a3a; -webkit-flex: 1; flex: 1; }
+.jvb-total .jvb-lbl { color: #aaa; }
+.jvb-total .jvb-num { color: #A5D6A7; font-size: 24px; }
+.jvb-ok {
+  width: 62px; background: #1976D2; border: none; color: #FFF;
+  font-size: 30px; cursor: pointer; -webkit-flex-shrink: 0; flex-shrink: 0;
+  border-radius: 0;
+}
+.jvb-ok:active { background: #1565C0; }
+.jbet-formula-v {
+  background: #E8F5E9; color: #2E7D32;
+  text-align: center; font-size: 13px; font-weight: 700;
+  padding: 6px 8px; -webkit-flex-shrink: 0; flex-shrink: 0;
+  letter-spacing: .3px; border-bottom: 1px solid #C8E6C9;
+}
+
+/* ══════════ LISTA JOGOS (RSM) ══════════ */
+.jogo-item {
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  padding: 9px 12px; border-bottom: 1px solid #E3F2FD;
+  background: #FFF;
+}
+.jogo-info { -webkit-flex: 1; flex: 1; }
+.jogo-nome { font-size: 13px; font-weight: 700; color: #1565C0; }
+.jogo-nums { font-size: 12px; color: #555; letter-spacing: 1px; }
+.jogo-form { font-size: 12px; color: #388E3C; font-weight: 600; margin-top: 1px; }
+.jogo-del  { background: none; border: none; color: #E53935; font-size: 20px; padding: 4px 6px; cursor: pointer; }
+.rsm-total-bar {
+  display: -webkit-flex; display: flex;
+  -webkit-justify-content: space-between; justify-content: space-between;
+  -webkit-align-items: center; align-items: center;
+  background: #1565C0; color: #FFF;
+  padding: 10px 14px; -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.rsm-total-bar .tot-lbl { font-size: 12px; opacity: .8; }
+.rsm-total-bar .tot-val { font-size: 22px; font-weight: 700; color: #A5D6A7; }
+.btn-add-jogo {
+  display: block; width: calc(100% - 24px); margin: 8px 12px;
+  height: 44px; background: #1976D2; color: #FFF;
+  border: none; border-radius: 7px; font-size: 14px; font-weight: 700; cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ LOGIN ═══════════ -->
+<div id="s-login" class="sc on">
+  <div class="hdr-blue" style="-webkit-justify-content:center;justify-content:center;min-height:52px">
+    <span style="font-size:18px;font-weight:700">SISTEMA TERMINAL</span>
+  </div>
+  <div class="login-body">
+    <div class="login-logo">SORTE<br>OURO<br>POS</div>
+    <div class="login-title">Acesso do Operador</div>
+    <div class="login-sub">Digite seu telefone e senha</div>
+    <div class="login-label">Telefone</div>
+    <input id="inp-phone" class="login-inp" type="tel" placeholder="Ex: 83999990001" inputmode="tel" autocomplete="off">
+    <div class="login-label">Senha</div>
+    <input id="inp-pass" class="login-inp" type="password" placeholder="••••••••" autocomplete="off">
+    <button class="btn-login" id="btn-login" onclick="doLogin()">ENTRAR</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<div id="s-main" class="sc">
+  <div class="hdr-blue">
+    <div class="logo">SORTE<br>OURO<br>POS</div>
+    <div class="info">
+      <span class="name" id="bn-nome">–</span>
+      <span id="bn-reg">–</span>
+      <span id="bn-sl">Saldo: –</span>
+    </div>
+  </div>
+  <div class="scroll-y">
+    <button class="btn-vender" onclick="go('s-ext')">🍀  Vender</button>
+    <div class="menu-grid">
+      <button class="btn-mn" style="background:#E53935" onclick="go('s-rsm')"><span class="mn-ico">🎫</span>Bilhete</button>
+      <button class="btn-mn" style="background:#1E88E5" onclick="abrirHistorico()"><span class="mn-ico">📋</span>Resultado</button>
+      <button class="btn-mn" style="background:#FB8C00" onclick="aviso('Repetir')"><span class="mn-ico">🔁</span>Repetir</button>
+      <button class="btn-mn" style="background:#FF6D00" onclick="aviso('Caixa')"><span class="mn-ico">💰</span>Caixa</button>
+      <button class="btn-mn" style="background:#8E24AA" onclick="aviso('Impressora')"><span class="mn-ico">🖨️</span>Impressora</button>
+      <button class="btn-mn" style="background:#D81B60" onclick="aviso('Regulamento')"><span class="mn-ico">📜</span>Regulamento</button>
+      <button class="btn-mn" style="background:#78909C" onclick="aviso('Senha')"><span class="mn-ico">🔑</span>Senha</button>
+      <button class="btn-mn" style="background:#00897B" onclick="abrirCotacoes()"><span class="mn-ico">💱</span>Cotações</button>
+    </div>
+    <div class="sair" onclick="logout()">Sair</div>
+    <div class="ver">versão 1.0 · SorteOuroPOS</div>
+  </div>
+</div>
+
+<!-- ═══════════ SORTEIOS ═══════════ -->
+<div id="s-ext" class="sc">
+  <div class="hdr-date" id="hdr-dt"></div>
+  <div class="scroll-y lst-pad" id="list-ext"></div>
+</div>
+
+<!-- ═══════════ MODALIDADES ═══════════ -->
+<div id="s-tipo" class="sc">
+  <div class="hdr-green">
+    <button class="back" onclick="go('s-ext')">‹</button>
+    <span id="tipo-hdr">Tipo de Jogo</span>
+    <span></span>
+  </div>
+  <div class="scroll-y lst-pad" id="list-tipo"></div>
+</div>
+
+<!-- ═══════════ GRUPO ═══════════ -->
+<div id="s-grupo" class="sc">
+  <div class="hdr-green">
+    <button class="back" onclick="go('s-tipo')">‹</button>
+    <span id="g-title">Grupo</span>
+    <span class="g-cnt" id="g-cnt">0</span>
+  </div>
+  <div class="g-display" id="g-disp">--</div>
+  <div id="g-hint" style="display:none;text-align:center;color:#FFA726;font-size:13px;padding:4px 0;font-weight:600"></div>
+  <div class="g-body">
+    <div class="animais-wrap"><div class="grid-an" id="an-grid"></div></div>
+    <div class="sidebar">
+      <button class="s-del" onclick="gDel()">⌫</button>
+      <button class="s-lmp" onclick="gLmp()">↩</button>
+      <button class="s-ok"  onclick="gOk()">✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TECLADO NÚMEROS ═══════════ -->
+<div id="s-num" class="sc">
+  <div class="hdr-green">
+    <button class="back" onclick="go('s-tipo')">‹</button>
+    <span id="n-title">Dezena</span>
+    <span class="g-cnt" id="n-cnt">0</span>
+  </div>
+  <!-- Área JBet: números como texto grande -->
+  <div class="n-lista-wrap" id="n-lista-wrap" style="color:#AAA;font-size:15px;letter-spacing:2px">Nenhum número adicionado</div>
+  <!-- Barra JBet: Prêmio / palpites / apagar -->
+  <div class="jbet-info">
+    <div class="jbi-box">
+      <span class="jbi-lbl">Prêmio</span>
+      <span class="jbi-val" id="jbi-premio">–</span>
+    </div>
+    <div class="jbi-sep">|</div>
+    <div class="jbi-box" style="-webkit-flex:1;flex:1">
+      <span class="jbi-lbl">Palpites</span>
+      <span class="jbi-val" id="jbi-count">0</span>
+    </div>
+    <button class="jbi-del" onclick="nDel()">⌫</button>
+  </div>
+  <!-- Dígitos em digitação -->
+  <div id="n-hint" style="display:none;text-align:center;font-size:12px;font-weight:600;padding:2px;background:#FFF9C4;color:#F57F17"></div>
+  <div class="n-instr" id="n-ex" style="background:#f5f5f5;color:#888">Digite os dígitos — confirma automaticamente</div>
+  <div class="n-disp"  id="n-disp">____</div>
+  <div class="teclado-row">
+    <div class="numpad">
+      <button class="k" onclick="nAdd('1')">1</button><button class="k" onclick="nAdd('2')">2</button><button class="k" onclick="nAdd('3')">3</button>
+      <button class="k" onclick="nAdd('4')">4</button><button class="k" onclick="nAdd('5')">5</button><button class="k" onclick="nAdd('6')">6</button>
+      <button class="k" onclick="nAdd('7')">7</button><button class="k" onclick="nAdd('8')">8</button><button class="k" onclick="nAdd('9')">9</button>
+      <button class="k empty"></button><button class="k" onclick="nAdd('0')">0</button><button class="k empty"></button>
+    </div>
+    <div class="ks">
+      <button class="k-del" style="opacity:.4;pointer-events:none">⌫</button>
+      <button class="k-ok dim" id="btn-ok-n" onclick="nOk()">✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TECLADO VALOR ═══════════ -->
+<div id="s-val" class="sc">
+  <div class="hdr-green">
+    <button class="back" onclick="goBackVal()">‹</button>
+    <span id="v-title">Valor</span>
+    <span></span>
+  </div>
+  <div class="v-mm" id="v-mm">Máx/nº: R$ –</div>
+
+  <!-- ── Barra JBet: Prêmio | Valor digitado | Ou | Total | ✓ ── -->
+  <div class="jbet-val-bar">
+    <div class="jvb-box">
+      <span class="jvb-lbl">Prêmio</span>
+      <span class="jvb-num" id="jvb-premio">–</span>
+    </div>
+    <div class="jvb-sep"></div>
+    <div class="jvb-box" style="-webkit-flex:1;flex:1">
+      <span class="jvb-lbl">Valor</span>
+      <span class="jvb-num" id="jvb-valor">0</span>
+    </div>
+    <div class="jvb-ou">Ou</div>
+    <div class="jvb-box jvb-total" style="-webkit-flex:1;flex:1">
+      <span class="jvb-lbl">Total</span>
+      <span class="jvb-num" id="jvb-total">0,00</span>
+    </div>
+    <button class="jvb-ok" onclick="vOk()">✓</button>
+  </div>
+
+  <!-- Fórmula viva: X a YP x R$V = R$T -->
+  <div class="jbet-formula-v" id="jvb-formula">–</div>
+
+  <!-- Modo dividir/multiplicar compacto -->
+  <div class="modo-row" style="height:52px">
+    <button class="btn-modo m-on"  id="m-div" onclick="setModo('d')">÷ Dividir<br><span id="v-dt" style="font-size:10px">–</span></button>
+    <button class="btn-modo m-off" id="m-mul" onclick="setModo('m')">× Multiplicar<br><span id="v-mt" style="font-size:10px">–</span></button>
+  </div>
+
+  <div class="teclado-row">
+    <div class="numpad">
+      <button class="k" onclick="vAdd('1')">1</button><button class="k" onclick="vAdd('2')">2</button><button class="k" onclick="vAdd('3')">3</button>
+      <button class="k" onclick="vAdd('4')">4</button><button class="k" onclick="vAdd('5')">5</button><button class="k" onclick="vAdd('6')">6</button>
+      <button class="k" onclick="vAdd('7')">7</button><button class="k" onclick="vAdd('8')">8</button><button class="k" onclick="vAdd('9')">9</button>
+      <button class="k" onclick="vClr()">C</button><button class="k" onclick="vAdd('0')">0</button><button class="k" onclick="vCom()">,</button>
+    </div>
+    <div class="ks">
+      <button class="k-del" onclick="vDel()">⌫</button>
+      <button class="k-ok"  onclick="vOk()">✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ RESUMO ═══════════ -->
+<div id="s-rsm" class="sc">
+  <div class="hdr-resumo">
+    <div class="lbl">Valor da Aposta</div>
+    <div class="val" id="rsm-tot">R$ 0,00</div>
+    <div id="rsm-custo" style="display:none;font-size:13px;color:#FFA726;font-weight:700;margin-top:2px"></div>
+    <div id="rsm-saldo" style="font-size:12px;color:rgba(255,255,255,.75);margin-top:1px"></div>
+  </div>
+  <div class="rsm-exts" id="rsm-exts">Válido para: –</div>
+  <div class="scroll-y" id="rsm-list" style="display:none"></div>
+  <div class="rsm-vz" id="rsm-vz">Nenhuma aposta.<br>Toque em <b>Bilhete</b> para apostar.</div>
+  <div id="rsm-err" style="display:none;background:#B71C1C;color:#FFF;padding:10px 12px;font-size:12px;border-radius:6px;margin:0 8px 6px;word-break:break-all;max-height:140px;overflow-y:auto;font-family:monospace;line-height:1.4"></div>
+  <div class="rsm-foot">
+    <button class="f-nb" onclick="go('s-ext')">Bilhete</button>
+    <button class="f-ca" onclick="cancelar()">Cancelar</button>
+    <button class="f-fi" id="btn-fin" onclick="finBilhete()">Finalizar</button>
+  </div>
+</div>
+
+<!-- ═══════════ DIALOG CLONAR ═══════════ -->
+<div class="dlg-bg" id="dlg">
+  <div class="dlg">
+    <div class="dlg-title">Jogo adicionado!</div>
+    <div class="dlg-msg" id="dlg-resumo-linha" style="font-family:monospace;font-size:13px;color:#1565C0;margin-bottom:10px"></div>
+    <div class="dlg-msg">Deseja adicionar mais?</div>
+    <div class="dlg-btns" style="-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:flex-end;align-items:flex-end;gap:8px">
+      <div style="display:-webkit-flex;display:flex;gap:8px">
+        <button onclick="novoJogo()" style="color:#388E3C">+ NOVO JOGO</button>
+        <button onclick="clonar()" style="color:#1565C0">REPETIR</button>
+      </div>
+      <button onclick="finAp()" style="color:#E53935">FINALIZAR →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ DIALOG TICKET ═══════════ -->
+<div class="dlg-bg" id="dlg-tk">
+  <div class="ticket-dlg">
+    <div class="ticket-hdr">✅ Bilhete registrado!</div>
+    <!-- Comprovante formatado igual ao papel 58mm -->
+    <pre class="ticket-pre" id="tk-comprovante"></pre>
+    <!-- Log de impressão -->
+    <div id="print-log" style="display:none;font-size:11px;border-radius:6px;padding:8px;margin-bottom:8px;word-break:break-all;font-family:monospace;max-height:80px;overflow-y:auto"></div>
+    <div class="ticket-btns">
+      <button class="btn-ok-tk" id="btn-imprimir" onclick="imprimirTicket()" style="background:#388E3C">🖨 Imprimir</button>
+      <button class="btn-ok-tk" onclick="diagnosticarImpressora()" style="background:#546E7A;font-size:13px">🔍 Diagnóstico</button>
+      <button class="btn-ok-tk" onclick="fecharTicket()">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Config ───────────────────────────────────────────────────────────────────
+var API = 'https://webapp414930.ip-45-79-2-160.cloudezapp.io/api';
+
+// ─── API helper ───────────────────────────────────────────────────────────────
+function api(path, opts) {
+  opts = opts || {};
+  var token   = localStorage.getItem('token');
+  var headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+
+  return fetch(API + path, {
+    method:  opts.method || 'GET',
+    headers: headers,
+    body:    opts.body   || undefined
+  }).then(function(res) {
+    return res.text().then(function(text) {
+      var data = null;
+      try { data = JSON.parse(text); } catch(e) { /* resposta não-JSON */ }
+
+      if (res.status === 401) {
+        if (opts.noAutoLogout) {
+          throw new Error('Sessão expirada (401). Faça login novamente.');
+        }
+        logout();
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
+      if (res.status === 403) { throw new Error('Conta desativada. Contate o administrador.'); }
+      if (!res.ok) {
+        var raw = (data && (data.error || data.detail || data.message));
+        if (!raw && data) { try { raw = JSON.stringify(data); } catch(e) {} }
+        throw new Error(raw || ('Erro HTTP ' + res.status));
+      }
+      return data;
+    });
+  }, function(netErr) {
+    throw new Error('Sem conexão com o servidor. Verifique a internet.');
+  });
+}
+
+// API sem token — para rotas públicas (draws, modality-settings, quotations)
+function apiPublic(path) {
+  return fetch(API + path, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  }).then(function(res) {
+    return res.text().then(function(text) {
+      var data = null;
+      try { data = JSON.parse(text); } catch(e) {}
+      if (!res.ok) {
+        var msg = (data && (data.error || data.detail || data.message)) || ('Erro HTTP ' + res.status);
+        throw new Error(msg);
+      }
+      return data;
+    });
+  }, function() {
+    throw new Error('Sem conexão com o servidor. Verifique a internet.');
+  });
+}
+
+// Normaliza resposta: suporta array puro ou {results:[...]} (DRF paginado)
+function toArray(data) {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  if (data.results && Array.isArray(data.results)) return data.results;
+  return [];
+}
+
+// ─── Estado ───────────────────────────────────────────────────────────────────
+var st = {
+  user: null, draw: null, mod: null,
+  grupos: [], nums: '', nList: [], val: '', modo: 'd', entrada: null,
+  apostas: []
+};
+
+// ─── Navegação ────────────────────────────────────────────────────────────────
+function go(id) {
+  var all = document.querySelectorAll('.sc');
+  for (var i = 0; i < all.length; i++) all[i].classList.remove('on');
+  document.getElementById(id).classList.add('on');
+  if (id === 's-ext') loadDraws();
+  if (id === 's-rsm') buildRsm();
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+var d = new Date();
+document.getElementById('hdr-dt').textContent =
+  pad(d.getDate()) + '/' + pad(d.getMonth()+1) + '/' + d.getFullYear();
+
+function pad(n) { return n < 10 ? '0'+n : ''+n; }
+
+// Restaura sessão
+(function() {
+  var token = localStorage.getItem('token');
+  var user  = localStorage.getItem('user');
+  if (token && user) {
+    try { st.user = JSON.parse(user); updateUI(); go('s-main'); } catch(e) {}
+  }
+})();
+
+// ─── Login ────────────────────────────────────────────────────────────────────
+function doLogin() {
+  var phone = document.getElementById('inp-phone').value.trim();
+  var pass  = document.getElementById('inp-pass').value;
+  var errEl = document.getElementById('login-err');
+  var btn   = document.getElementById('btn-login');
+  errEl.textContent = '';
+  if (!phone || !pass) { errEl.textContent = 'Preencha telefone e senha.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  api('/login', { method: 'POST', body: JSON.stringify({ phone: phone, password: pass }) })
+    .then(function(data) {
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      st.user = data.user;
+      updateUI();
+      document.getElementById('inp-pass').value = '';
+      go('s-main');
+    })
+    .catch(function(e) { errEl.textContent = e.message; })
+    .finally(function() { btn.disabled = false; btn.textContent = 'ENTRAR'; });
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  st.user = null; st.apostas = [];
+  go('s-login');
+}
+
+function updateUI() {
+  if (!st.user) return;
+  document.getElementById('bn-nome').textContent = st.user.name || '–';
+  document.getElementById('bn-reg').textContent  = 'Região: ' + (st.user.region_id || '–');
+  document.getElementById('bn-sl').textContent   = 'Saldo: R$ ' + Number(st.user.balance || 0).toFixed(2);
+}
+
+function refreshMe() {
+  api('/me').then(function(u) {
+    // /me pode retornar o objeto direto ou {user:{...}}
+    var user = (u && u.id) ? u : (u && u.user ? u.user : u);
+    if (!user) return;
+    st.user = user;
+    localStorage.setItem('user', JSON.stringify(user));
+    updateUI();
+  }).catch(function() {});
+}
+
+// ─── Sorteios ────────────────────────────────────────────────────────────────
+function loadDraws() {
+  var el = document.getElementById('list-ext');
+  el.innerHTML = '<div class="msg-load">Carregando sorteios...</div>';
+  apiPublic('/draws').then(function(data) {
+    var lista   = toArray(data);
+    var pending = lista.filter(function(d) { return d.status === 'pending'; });
+    el.innerHTML = '';
+    if (!pending.length) {
+      el.innerHTML = '<div class="msg-err">Nenhum sorteio disponível no momento.' +
+        (lista.length ? ' (' + lista.length + ' sorteio(s) retornado(s) com outro status).' : '') +
+        '</div>';
+      return;
+    }
+    pending.forEach(function(draw) {
+      var btn  = document.createElement('button');
+      btn.className = 'btn-ext';
+      var hora = draw.draw_time ? draw.draw_time.substring(11, 16) : '';
+      btn.innerHTML = '<span>' + draw.title + '</span><span style="font-size:14px;opacity:.85">' + hora + '</span>';
+      btn.onclick = function() {
+        st.draw = draw; st.grupos = []; st.nums = ''; st.val = ''; st.entrada = null;
+        loadMods(); go('s-tipo');
+      };
+      el.appendChild(btn);
+    });
+  }).catch(function(e) {
+    el.innerHTML = '<div class="msg-err">' + e.message +
+      '<br><br><button onclick="loadDraws()" style="padding:8px 20px;background:#1565C0;color:#FFF;border:none;border-radius:6px;font-size:14px">Tentar novamente</button></div>';
+  });
+}
+
+// ─── Modalidades ─────────────────────────────────────────────────────────────
+function loadMods() {
+  var el = document.getElementById('list-tipo');
+  el.innerHTML = '<div class="msg-load">Carregando modalidades...</div>';
+  document.getElementById('tipo-hdr').textContent = (st.draw && st.draw.title) || 'Tipo de Jogo';
+
+  // Rota pública — chamada sem token para evitar rejeição por token inválido
+  apiPublic('/modality-settings').then(function(data) {
+    var lista  = toArray(data);
+
+    // Filtro robusto: aceita is_active=1, is_active=true, is_active="1"
+    var ativas = lista.filter(function(m) {
+      var v = m.is_active;
+      return v === 1 || v === true || v === '1' || v === 'true';
+    });
+
+    // Se o filtro eliminou tudo mas a lista tem itens, mostra tudo
+    // (pode ser que o backend não use is_active ou envie valor diferente)
+    if (ativas.length === 0 && lista.length > 0) {
+      ativas = lista;
+    }
+
+    el.innerHTML = '';
+    if (!ativas.length) {
+      el.innerHTML = '<div class="msg-err">Nenhuma modalidade recebida da API.<br>' +
+        '<small>Verifique /api/modality-settings</small></div>';
+      return;
+    }
+
+    ativas.forEach(function(mod) {
+      var info = modInfo(mod.bet_type);
+      var btn  = document.createElement('button');
+      btn.className = 'btn-tipo';
+      var mult = mod.multiplier ? Number(mod.multiplier).toLocaleString('pt-BR') + 'x' : '';
+      var cm   = (mod.charge_multiplier && Number(mod.charge_multiplier) > 1)
+        ? ' <span style="font-size:11px;color:#FFA726">×' + Number(mod.charge_multiplier) + ' sorteios</span>' : '';
+      btn.innerHTML = '<span>' + modLabel(mod) + '</span>' +
+        '<span style="font-size:13px;opacity:.85">' + mult + '</span>' + cm;
+      btn.onclick = function() {
+        st.mod = {
+          bet_type: mod.bet_type,
+          label: mod.label,
+          multiplier: mod.multiplier,
+          charge_multiplier: mod.charge_multiplier ? Number(mod.charge_multiplier) : 1,
+          q: info.q, g: info.g, min: info.min
+        };
+        if (info.g) { setupGrupo(); go('s-grupo'); }
+        else        { setupNum();   go('s-num');   }
+      };
+      el.appendChild(btn);
+    });
+  }).catch(function(e) {
+    el.innerHTML = '<div class="msg-err">' + e.message +
+      '<br><br><button onclick="loadMods()" style="padding:8px 20px;background:#1565C0;color:#FFF;border:none;border-radius:6px;font-size:14px">Tentar novamente</button></div>';
+  });
+}
+
+function modInfo(bt) {
+  if (!bt) return { q: 2, g: false, min: 1 };
+  var b = bt.toUpperCase().replace(/-/g, '_');
+  // Mínimo de apostas: DUQUE=2, TERNO=3, demais=1
+  var min = b.indexOf('TERNO') >= 0 ? 3 : (b.indexOf('DUQUE') >= 0 ? 2 : 1);
+  // Numéricos — ordem importa: MILHAR antes de DEZENA
+  if (b.indexOf('MILHAR')  >= 0) return { q: 4, g: false, min: min };
+  if (b.indexOf('CENTENA') >= 0) return { q: 3, g: false, min: min };
+  if (b.indexOf('DEZENA')  >= 0) return { q: 2, g: false, min: min };
+  // Grupos (bichos)
+  if (b.indexOf('GRUPO')   >= 0) return { q: null, g: true, min: min };
+  if (b.indexOf('TERNO')   >= 0) return { q: null, g: true, min: min };
+  if (b.indexOf('DUQUE')   >= 0) return { q: null, g: true, min: min };
+  if (b.indexOf('TRINCA')  >= 0) return { q: null, g: true, min: 1  };
+  var m = b.match(/_(\d+)$/);
+  if (m) return { q: parseInt(m[1]), g: false, min: 1 };
+  return { q: 2, g: false, min: 1 };
+}
+function modLabel(mod) {
+  // Aceita objeto mod (preferência pelo label da API) ou string bet_type
+  if (!mod) return '';
+  if (typeof mod === 'string') return mod.replace(/_/g, ' ').replace(/-/g, ' ');
+  return mod.label || (mod.bet_type || '').replace(/_/g, ' ').replace(/-/g, ' ');
+}
+
+// ─── Grupo (Bichos) ──────────────────────────────────────────────────────────
+var BICHOS = [
+  [1,'Avestruz','🦢','01-04'],[2,'Águia','🦅','05-08'],[3,'Burro','🐴','09-12'],
+  [4,'Borboleta','🦋','13-16'],[5,'Cachorro','🐕','17-20'],[6,'Cabra','🐐','21-24'],
+  [7,'Carneiro','🐑','25-28'],[8,'Camelo','🐪','29-32'],[9,'Cobra','🐍','33-36'],
+  [10,'Coelho','🐇','37-40'],[11,'Cavalo','🐎','41-44'],[12,'Elefante','🐘','45-48'],
+  [13,'Galo','🐓','49-52'],[14,'Gato','🐱','53-56'],[15,'Jacaré','🐊','57-60'],
+  [16,'Leão','🦁','61-64'],[17,'Macaco','🐒','65-68'],[18,'Porco','🐷','69-72'],
+  [19,'Pavão','🦚','73-76'],[20,'Peru','🦃','77-80'],[21,'Touro','🐂','81-84'],
+  [22,'Tigre','🐯','85-88'],[23,'Urso','🐻','89-92'],[24,'Veado','🦌','93-96'],
+  [25,'Vaca','🐄','97-00']
+];
+
+function setupGrupo() {
+  st.grupos = [];
+  document.getElementById('g-title').textContent = modLabel(st.mod || 'Grupo');
+  updG();
+  var g = document.getElementById('an-grid');
+  if (g.children.length) return;
+  BICHOS.forEach(function(b) {
+    var btn = document.createElement('button');
+    btn.className = 'btn-an';
+    btn.innerHTML = '<span class="an-em">' + b[2] + '</span><span class="an-dz">' + b[3] + '</span><span class="an-nm">' + b[1].substring(0,8) + '</span>';
+    btn.dataset.num = pad(b[0]);
+    btn.onclick = function() {
+      st.grupos.push(btn.dataset.num);
+      btn.classList.add('sel');
+      setTimeout(function() { btn.classList.remove('sel'); }, 250);
+      updG();
+    };
+    g.appendChild(btn);
+  });
+}
+function updG() {
+  var min = (st.mod && st.mod.min) || 1;
+  document.getElementById('g-disp').textContent = st.grupos.length ? st.grupos.join('  ') : '--';
+  document.getElementById('g-cnt').textContent  = st.grupos.length;
+  // Feedback visual de mínimo exigido
+  var hint = document.getElementById('g-hint');
+  if (hint) {
+    if (min > 1) {
+      hint.textContent = 'Selecione ' + min + ' grupo(s) — ' + st.grupos.length + '/' + min;
+      hint.style.display = '';
+    } else {
+      hint.style.display = 'none';
+    }
+  }
+}
+function gDel() { if (st.grupos.length) { st.grupos.pop(); updG(); } }
+function gLmp() { st.grupos = []; updG(); }
+function gOk()  {
+  var min = (st.mod && st.mod.min) || 1;
+  if (!st.grupos.length) { alert('Selecione ao menos um grupo.'); return; }
+  if (st.grupos.length < min) {
+    alert('Esta modalidade exige ' + min + ' grupo(s).\nVocê selecionou: ' + st.grupos.length); return;
+  }
+  // Para DUQUE/TERNO: só envia os primeiros "min" grupos
+  st.entrada = st.grupos.slice(0, min > 1 ? min : st.grupos.length).join(',');
+  setupVal(); go('s-val');
+}
+
+// ─── Teclado Números ─────────────────────────────────────────────────────────
+function setupNum() {
+  var q   = st.mod ? st.mod.q   : 2;
+  var min = st.mod ? (st.mod.min || 1) : 1;
+  st.nums = '';
+  // Se vier de "Novo Jogo" e os números têm o mesmo tamanho de dígitos, pré-preenche
+  if (st._prevNList && st._prevNList.length > 0 && st._prevQ === q) {
+    st.nList = st._prevNList.slice();
+  } else {
+    st.nList = [];
+  }
+  st._prevNList = null;
+  st._prevQ     = 0;
+  document.getElementById('n-title').textContent = modLabel(st.mod || 'Números');
+  var instr = 'Digite ' + q + ' dígito(s)';
+  if (min > 1) instr += ' — mín. ' + min + ' palpites';
+  document.getElementById('n-ex').textContent = instr;
+  // Inicializa Prêmio na barra JBet
+  var premioEl = document.getElementById('jbi-premio');
+  if (premioEl) {
+    var mult = (st.mod && st.mod.multiplier) ? Number(st.mod.multiplier) : null;
+    premioEl.textContent = mult ? mult + 'x' : '–';
+  }
+  var countEl = document.getElementById('jbi-count');
+  if (countEl) countEl.textContent = '0';
+  updN();
+  updNList();
+}
+
+function nAdd(c) {
+  var q = st.mod ? st.mod.q : 2;
+  if (st.nums.length < q) {
+    st.nums += c;
+    updN();
+    // Ao completar os dígitos, confirma automaticamente após breve pausa visual
+    if (st.nums.length === q) {
+      setTimeout(nConfirm, 200);
+    }
+  }
+}
+
+function nDel() {
+  if (st.nums.length) {
+    // apaga o último dígito do número em digitação
+    st.nums = st.nums.slice(0, -1);
+    updN();
+  } else if (st.nList.length) {
+    // se não há digitação, remove o último palpite confirmado
+    st.nList.pop();
+    updNList();
+  }
+}
+
+function nConfirm() {
+  var q = st.mod ? st.mod.q : 2;
+  if (st.nums.length < q) return;
+  st.nList.push(st.nums);
+  st.nums = '';
+  updN();
+  updNList();
+}
+
+function updN() {
+  var q   = st.mod ? st.mod.q : 2;
+  var str = st.nums;
+  for (var i = str.length; i < q; i++) str += '_';
+  document.getElementById('n-disp').textContent = str;
+}
+
+function updNList() {
+  var wrap = document.getElementById('n-lista-wrap');
+  document.getElementById('n-cnt').textContent = st.nList.length;
+
+  // ── Exibe como texto grande (estilo JBet) ──
+  if (!st.nList.length) {
+    wrap.style.color = '#AAA'; wrap.style.fontSize = '15px'; wrap.style.letterSpacing = '2px';
+    wrap.textContent = 'Nenhum número adicionado';
+  } else {
+    wrap.style.color = '#1565C0'; wrap.style.fontSize = '22px'; wrap.style.letterSpacing = '4px';
+    wrap.textContent = st.nList.join('  ');
+  }
+
+  // ── Barra JBet: Prêmio / contagem ──
+  var premioEl = document.getElementById('jbi-premio');
+  var countEl  = document.getElementById('jbi-count');
+  if (premioEl) {
+    var mult = (st.mod && st.mod.multiplier) ? Number(st.mod.multiplier) : null;
+    premioEl.textContent = mult ? mult + 'x' : '–';
+  }
+  if (countEl) countEl.textContent = st.nList.length;
+
+  var min   = (st.mod && st.mod.min) || 1;
+  var okBtn = document.getElementById('btn-ok-n');
+  if (st.nList.length >= min) okBtn.classList.remove('dim');
+  else okBtn.classList.add('dim');
+
+  var hintEl = document.getElementById('n-hint');
+  if (hintEl) {
+    if (min > 1) {
+      hintEl.textContent = st.nList.length + '/' + min + ' palpites';
+      hintEl.style.display = '';
+    } else {
+      hintEl.style.display = 'none';
+    }
+  }
+}
+
+function nOk() {
+  var q   = st.mod ? st.mod.q   : 2;
+  var min = st.mod ? (st.mod.min || 1) : 1;
+  if (st.nums.length >= q) { nConfirm(); }
+  if (!st.nList.length) return;
+  if (st.nList.length < min) {
+    alert('Esta modalidade exige ' + min + ' palpite(s).\nAdicionados: ' + st.nList.length); return;
+  }
+  // DUQUE/TERNO: envia apenas os primeiros "min" palpites como uma entrada única
+  var lista = (min > 1) ? st.nList.slice(0, min) : st.nList;
+  st.entrada = lista.join(',');
+  setupVal(); go('s-val');
+}
+
+// ─── Teclado Valor ───────────────────────────────────────────────────────────
+function setupVal() {
+  st.val = ''; st.modo = 'd';
+  document.getElementById('v-title').textContent = modLabel(st.mod || 'Valor');
+  var mx = (st.draw && st.draw.max_value_per_number) || 500;
+  document.getElementById('v-mm').textContent = 'Máx/nº: R$ ' + Number(mx).toFixed(2);
+  // Prêmio inicial na barra JBet
+  var jvbPremio = document.getElementById('jvb-premio');
+  if (jvbPremio) {
+    var mult = (st.mod && st.mod.multiplier) ? Number(st.mod.multiplier) : null;
+    jvbPremio.textContent = mult ? mult + 'x' : '–';
+  }
+  var jvbFormula = document.getElementById('jvb-formula');
+  if (jvbFormula) jvbFormula.textContent = '–';
+  updV(); updModo();
+}
+function goBackVal() { if (st.mod && st.mod.g) go('s-grupo'); else go('s-num'); }
+function vAdd(c) { st.val += c; updV(); }
+function vCom()  { if (st.val.indexOf(',') < 0) { st.val = (st.val || '0') + ','; updV(); } }
+function vClr()  { st.val = ''; updV(); }
+function vDel()  { if (st.val.length) { st.val = st.val.slice(0,-1); updV(); } }
+function updV() {
+  var v     = parseFloat((st.val || '0').replace(',','.')) || 0;
+  var cm    = (st.mod && st.mod.charge_multiplier) ? Number(st.mod.charge_multiplier) : 1;
+  var min   = (st.mod && st.mod.min) ? st.mod.min : 1;
+  var mult  = (st.mod && st.mod.multiplier) ? Number(st.mod.multiplier) : null;
+  var count = (min > 1) ? 1 : ((st.entrada ? st.entrada.split(',').length : 1) || 1);
+
+  // ── Cálculos corretos ─────────────────────────────────────────────────────
+  // Dividir  : v = total nominal → por palpite = v/count
+  //            real API = (v/count) × count × cm = v × cm
+  // Multiplicar: v = por palpite → real = v × count × cm
+  var perNum  = count > 0 ? v / count : 0;
+  var realDiv = v * cm;
+  var realMul = v * count * cm;
+
+  var jvbPremio  = document.getElementById('jvb-premio');
+  var jvbValor   = document.getElementById('jvb-valor');
+  var jvbTotal   = document.getElementById('jvb-total');
+  var jvbFormula = document.getElementById('jvb-formula');
+
+  if (jvbPremio) jvbPremio.textContent = mult ? mult + 'x' : '–';
+  if (jvbValor)  jvbValor.textContent  = (st.val || '0');
+
+  var totalReal = st.modo === 'd' ? realDiv : realMul;
+  var totalFmt  = totalReal.toFixed(2).replace('.',',');
+  if (jvbTotal) jvbTotal.textContent = totalFmt;
+
+  // ── Fórmula legível ───────────────────────────────────────────────────────
+  if (jvbFormula) {
+    var vFmt   = v.toFixed(2).replace('.',',');
+    var perFmt = perNum.toFixed(2).replace('.',',');
+    var f = '';
+    if (st.modo === 'd') {
+      // Ex: "R$1,00 ÷ 4nº = R$0,25/nº × 5 sort. = R$5,00"
+      f = count > 1
+        ? 'R$ ' + vFmt + ' ÷ ' + count + ' nº = R$ ' + perFmt + '/nº'
+        : 'R$ ' + vFmt;
+      if (cm > 1) f += ' × ' + cm + ' sort. = R$ ' + totalFmt;
+      else        f += ' = R$ ' + totalFmt;
+    } else {
+      // Ex: "4P × R$1,00 × 5 sort. = R$20,00"
+      f = count > 1 ? count + 'P × R$ ' + vFmt : 'R$ ' + vFmt;
+      if (cm > 1) f += ' × ' + cm + ' sort. = R$ ' + totalFmt;
+      else        f += ' = R$ ' + totalFmt;
+    }
+    jvbFormula.textContent = f;
+  }
+
+  // v-disp oculto (compat)
+  var vd = document.getElementById('v-disp');
+  if (vd) vd.textContent = 'R$ ' + (st.val || '0');
+
+  // Labels nos botões Dividir/Multiplicar
+  var perFmt2 = perNum.toFixed(2).replace('.',',');
+  var dtTxt = count > 1
+    ? 'R$ ' + perFmt2 + '/nº' + (cm > 1 ? ' (×' + cm + ' sort.)' : '')
+    : 'R$ ' + (v.toFixed(2).replace('.',',')) + (cm > 1 ? ' (×' + cm + ' sort.)' : '');
+  var mtTxt = 'R$ ' + (v * count).toFixed(2).replace('.',',') + ' total';
+  if (cm > 1) mtTxt += ' (real: R$ ' + realMul.toFixed(2).replace('.',',') + ')';
+  document.getElementById('v-dt').textContent = dtTxt;
+  document.getElementById('v-mt').textContent = mtTxt;
+}
+
+function setModo(m) { st.modo = m; updModo(); }
+function updModo() {
+  document.getElementById('m-div').className = 'btn-modo ' + (st.modo === 'd' ? 'm-on' : 'm-off');
+  document.getElementById('m-mul').className = 'btn-modo ' + (st.modo === 'm' ? 'm-on' : 'm-off');
+}
+function vOk() {
+  var v     = parseFloat(st.val.replace(',','.'));
+  var mx    = (st.draw && st.draw.max_value_per_number) || 500;
+  var count = (st.entrada ? st.entrada.split(',').length : 1) || 1;
+  // Dividir: cada número recebe v/count → limite por número
+  // Multiplicar: cada número recebe v → limite direto
+  var amtCheck = st.modo === 'd' ? v / count : v;
+  if (!v || isNaN(v) || v <= 0) {
+    alert('Valor inválido. Informe um valor maior que zero.'); return;
+  }
+  if (amtCheck > mx) {
+    alert('Valor por número excede o limite!\nMáx por número: R$ ' + Number(mx).toFixed(2) +
+      '\nCom ' + count + ' número(s) no modo ' + (st.modo === 'd' ? 'Dividir' : 'Multiplicar') +
+      ', o valor por número seria R$ ' + amtCheck.toFixed(2)); return;
+  }
+  st.apostas.push({ draw: st.draw, mod: st.mod, entrada: st.entrada, valor: v, modo: st.modo });
+  // Atualiza linha de resumo no dialog
+  var lbl  = modLabel(st.mod);
+  var cm   = (st.mod && st.mod.charge_multiplier) ? Number(st.mod.charge_multiplier) : 1;
+  var cnt  = (st.mod && st.mod.min > 1) ? 1 : ((st.entrada ? st.entrada.split(',').length : 1) || 1);
+  var real = st.modo === 'd' ? (v * cm) : (v * cnt * cm);
+  var cmLbl = cm > 1 ? '1 a ' + cm + 'P' : '1P';
+  var dlgLinha = document.getElementById('dlg-resumo-linha');
+  if (dlgLinha) dlgLinha.textContent = lbl + ' → ' + cmLbl + ' × R$ ' + v.toFixed(2).replace('.',',') + ' = R$ ' + real.toFixed(2).replace('.',',');
+  // Total acumulado
+  var totAc = 0;
+  st.apostas.forEach(function(a) {
+    var ac = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
+    var nc = (a.mod && a.mod.min > 1) ? 1 : ((a.entrada ? a.entrada.split(',').length : 1) || 1);
+    totAc += a.modo === 'd' ? (a.valor * ac) : (a.valor * nc * ac);
+  });
+  document.getElementById('dlg').classList.add('on');
+}
+function clonar() { document.getElementById('dlg').classList.remove('on'); st.val = ''; updV(); }
+function finAp()  { document.getElementById('dlg').classList.remove('on'); go('s-rsm'); }
+function novoJogo() {
+  document.getElementById('dlg').classList.remove('on');
+  // Preserva números e dígitos do jogo anterior para pré-preencher o próximo
+  st._prevNList = st.nList.slice();
+  st._prevQ     = st.mod ? (st.mod.q || 0) : 0;
+  go('s-tipo');
+}
+
+// ─── Resumo ──────────────────────────────────────────────────────────────────
+function totalAposta(a) {
+  var min   = (a.mod && a.mod.min) || 1;
+  var count = (min > 1) ? 1 : (a.entrada ? a.entrada.split(',').length : 1);
+  return a.modo === 'm' ? (a.valor * count) : a.valor;
+}
+
+function totalCustoReal(apostas) {
+  var total = 0;
+  apostas.forEach(function(a) {
+    var cm = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
+    total += totalAposta(a) * cm;
+  });
+  return total;
+}
+
+function buildRsm() {
+  // ── Calcula totais ──────────────────────────────────────────────────────
+  var totReal = 0;
+  st.apostas.forEach(function(a) {
+    var cm  = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
+    var cnt = (a.mod && a.mod.min > 1) ? 1 : ((a.entrada ? a.entrada.split(',').length : 1) || 1);
+    totReal += a.modo === 'd' ? (a.valor * cm) : (a.valor * cnt * cm);
+  });
+
+  // ── Cabeçalho resumo ───────────────────────────────────────────────────
+  document.getElementById('rsm-tot').textContent = 'R$ ' + totReal.toFixed(2).replace('.',',');
+  var custoEl = document.getElementById('rsm-custo');
+  if (custoEl) custoEl.style.display = 'none';
+  var saldoEl = document.getElementById('rsm-saldo');
+  var saldo   = st.user ? Number(st.user.balance || 0) : 0;
+  if (saldoEl && st.user) {
+    saldoEl.style.color = saldo < totReal ? '#FF8A80' : 'rgba(255,255,255,.75)';
+    saldoEl.textContent = 'Saldo: R$ ' + saldo.toFixed(2).replace('.',',');
+  }
+
+  var exts = [];
+  st.apostas.forEach(function(a) { if (exts.indexOf(a.draw.title) < 0) exts.push(a.draw.title); });
+  document.getElementById('rsm-exts').textContent = 'Válido para: ' + (exts.join(', ') || '–');
+
+  var list = document.getElementById('rsm-list');
+  var vz   = document.getElementById('rsm-vz');
+  var btn  = document.getElementById('btn-fin');
+  list.innerHTML = '';
+
+  if (!st.apostas.length) {
+    list.style.display = 'none'; vz.style.display = ''; btn.disabled = true; return;
+  }
+  list.style.display = 'block'; vz.style.display = 'none'; btn.disabled = false;
+
+  // ── Barra de total ─────────────────────────────────────────────────────
+  var totBar = document.createElement('div');
+  totBar.className = 'rsm-total-bar';
+  totBar.innerHTML = '<div><div class="tot-lbl">Total (' + st.apostas.length + ' jogo(s))</div></div>' +
+    '<div class="tot-val">R$ ' + totReal.toFixed(2).replace('.',',') + '</div>';
+  list.appendChild(totBar);
+
+  // ── Botão Adicionar Jogo ───────────────────────────────────────────────
+  var addBtn = document.createElement('button');
+  addBtn.className = 'btn-add-jogo';
+  addBtn.textContent = '+ Adicionar Jogo';
+  addBtn.onclick = function() { go('s-ext'); };
+  list.appendChild(addBtn);
+
+  // ── Lista compacta de jogos ────────────────────────────────────────────
+  st.apostas.forEach(function(a, i) {
+    var cm   = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
+    var min  = (a.mod && a.mod.min) || 1;
+    var cnt  = (min > 1) ? 1 : ((a.entrada ? a.entrada.split(',').length : 1) || 1);
+    var real = a.modo === 'd' ? (a.valor * cm) : (a.valor * cnt * cm);
+    var cmLbl = cm > 1 ? '1 a ' + cm + 'P' : '1P';
+    var vFmt  = a.valor.toFixed(2).replace('.',',');
+    var rFmt  = real.toFixed(2).replace('.',',');
+    var forma = cmLbl + ' × R$ ' + vFmt + ' = R$ ' + rFmt;
+
+    var div = document.createElement('div');
+    div.className = 'jogo-item';
+    div.innerHTML =
+      '<div class="jogo-info">' +
+        '<div class="jogo-nome">' + modLabel(a.mod) + '</div>' +
+        '<div class="jogo-nums">' + (a.entrada || '').replace(/,/g, '  ') + '</div>' +
+        '<div class="jogo-form">' + forma + '</div>' +
+      '</div>' +
+      '<button class="jogo-del" onclick="remAp(' + i + ')">✕</button>';
+    list.appendChild(div);
+  });
+}
+
+function remAp(i) { st.apostas.splice(i, 1); buildRsm(); }
+function cancelar() {
+  if (!st.apostas.length) { go('s-main'); return; }
+  if (confirm('Cancelar e limpar apostas?')) { st.apostas = []; go('s-main'); }
+}
+
+// ─── Enviar bilhete ──────────────────────────────────────────────────────────
+function finBilhete() {
+  if (!st.apostas.length) return;
+
+  // Validação prévia de saldo
+  var custoRealTotal = totalCustoReal(st.apostas);
+  var saldoAtual     = st.user ? Number(st.user.balance || 0) : 0;
+
+  if (saldoAtual > 0 && custoRealTotal > saldoAtual + 0.001) {
+    alert('Saldo insuficiente!\n\nCusto real: R$ ' + custoRealTotal.toFixed(2) +
+      '\nSeu saldo: R$ ' + saldoAtual.toFixed(2) +
+      '\n\nObservação: modalidades com múltiplos sorteios multiplicam o valor pelo charge_multiplier.');
+    return;
+  }
+
+  // Confirmação com custo real
+  var totNominal = 0;
+  st.apostas.forEach(function(a) { totNominal += totalAposta(a); });
+  var msgConfirm = 'Confirmar aposta?\n\nValor: R$ ' + totNominal.toFixed(2);
+  if (custoRealTotal > totNominal + 0.001) {
+    msgConfirm += '\nCusto real: R$ ' + custoRealTotal.toFixed(2) +
+      ' (inclui múltiplos sorteios)';
+  }
+  if (saldoAtual > 0) {
+    msgConfirm += '\nSaldo após: R$ ' + Math.max(0, saldoAtual - custoRealTotal).toFixed(2);
+  }
+  if (!confirm(msgConfirm)) return;
+
+  // Monta bets
+  var bets = [];
+  st.apostas.forEach(function(a) {
+    var min = (a.mod && a.mod.min) || 1;
+
+    // bet_type: a API aceita minúsculo (docs usam "milhar_1_5"), enviamos lowercase
+    var btype = (a.mod.bet_type || '').toLowerCase();
+
+    if (min > 1) {
+      // DUQUE/TERNO: entrada inteira é UM bet (ex: "50,73" para duque de dezena)
+      var bet = {
+        draw_id:  a.draw.id,
+        numbers:  a.entrada,
+        amount:   parseFloat(a.valor.toFixed(2)),
+        bet_type: btype
+      };
+      if (a.mod.multiplier != null) bet.multiplier = Number(a.mod.multiplier);
+      bets.push(bet);
+    } else {
+      // Normal: cada número → bet separado
+      var nums  = a.entrada ? a.entrada.split(',') : [''];
+      var count = nums.length;
+      var amtPer = a.modo === 'd'
+        ? Math.floor((a.valor / count) * 100) / 100
+        : a.valor;
+      var resto  = a.modo === 'd'
+        ? Math.round((a.valor - amtPer * count) * 100) / 100
+        : 0;
+      nums.forEach(function(num, idx) {
+        var amt = amtPer + (idx === nums.length - 1 ? resto : 0);
+        var bet = {
+          draw_id:  a.draw.id,
+          numbers:  num.trim(),
+          amount:   parseFloat(amt.toFixed(2)),
+          bet_type: btype
+        };
+        if (a.mod.multiplier != null) bet.multiplier = Number(a.mod.multiplier);
+        bets.push(bet);
+      });
+    }
+  });
+
+  // customer_phone: opcional nos docs, enviamos quando disponível
+  var phone = st.user ? (st.user.phone || '') : '';
+  var bodyObj = { bets: bets };
+  if (phone) bodyObj.customer_phone = phone;
+
+  var payload = JSON.stringify(bodyObj);
+
+  // Limpa painel de erro anterior
+  var errEl = document.getElementById('rsm-err');
+  if (errEl) errEl.style.display = 'none';
+
+  var btn = document.getElementById('btn-fin');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+
+  var apostasEnviadas = st.apostas.slice();
+
+  // noAutoLogout=true: não redireciona para login se o token expirou durante o envio
+  // O erro aparece no alert para que o usuário veja e faça login manualmente
+  api('/bets/batch', { method: 'POST', body: payload, noAutoLogout: true })
+    .then(function(res) {
+      btn.disabled = false; btn.textContent = 'Finalizar';
+      try {
+
+      var tid   = res.ticketId   || res.ticket_id   || '–';
+      var total = Number(res.totalAmount || res.total_amount || 0).toFixed(2);
+
+      _ultimoComprovante = formatarComprovante(tid, total, apostasEnviadas, res);
+
+      var det = '';
+      apostasEnviadas.forEach(function(a, i) {
+        var min = (a.mod && a.mod.min) || 1;
+        var cm  = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
+        var c   = (min > 1) ? 1 : (a.entrada ? a.entrada.split(',').length : 1);
+        var tot = totalAposta(a);
+        det += (i+1) + '. ' + modLabel(a.mod) +
+          '\n   Nº: ' + a.entrada +
+          (min > 1 ? ' (combo ' + min + ' em 1 bet)' : ' (' + c + ' bet(s))') +
+          '\n   Valor: R$ ' + tot.toFixed(2) +
+          (cm > 1 ? ' | Custo real: R$ ' + (tot * cm).toFixed(2) : '') +
+          '\n   Sorteio: ' + a.draw.title + '\n';
+      });
+
+      document.getElementById('tk-comprovante').textContent = _ultimoComprovante;
+      document.getElementById('print-log').style.display = 'none';
+      document.getElementById('dlg-tk').classList.add('on');
+      st.apostas = [];
+      refreshMe();
+      } catch(jsErr) {
+        // Erro JS no handler de sucesso: bilhete FOI registrado na API mas UI falhou
+        var errEl3 = document.getElementById('rsm-err');
+        var msg3 = '⚠ Bilhete registrado mas houve erro na tela: ' + jsErr.message;
+        if (errEl3) { errEl3.style.display = 'block'; errEl3.textContent = msg3; }
+        alert(msg3);
+      }
+    })
+    .catch(function(e) {
+      btn.disabled = false; btn.textContent = 'Finalizar';
+      // Painel in-page — sempre visível mesmo se alert() estiver bloqueado
+      var msg = 'ERRO: ' + e.message + '\n\nPayload enviado:\n' + payload + '\n\n⚠ NÃO reenvie sem verificar o histórico!';
+      var errEl2 = document.getElementById('rsm-err');
+      if (errEl2) { errEl2.style.display = 'block'; errEl2.textContent = msg; }
+      // alert() como camada extra (funciona se WebChromeClient estiver configurado)
+      alert(msg);
+    });
+}
+
+function fecharTicket() {
+  document.getElementById('dlg-tk').classList.remove('on');
+  buildRsm();
+  go('s-main');
+}
+
+// ─── Impressão ────────────────────────────────────────────────────────────────
+// Variável que guarda o texto do último bilhete para reimprimir
+var _ultimoComprovante = '';
+
+function diagnosticarImpressora() {
+  if (!window.NativePrinter) {
+    printLog('NativePrinter não encontrado no WebView.', false); return;
+  }
+  printLog('Executando diagnóstico...', true);
+  try {
+    var raw = window.NativePrinter.diagnose();
+    var d = JSON.parse(raw);
+    var msg = '── DIAGNÓSTICO ──\n';
+    msg += 'Dispositivo: ' + (d.device ? d.device.brand + ' ' + d.device.model : '?') + '\n';
+    msg += 'Hardware: '    + (d.device ? (d.device.hardware || 'n/a') : '?') + '\n';
+    msg += 'Android SDK: ' + (d.device ? d.device.sdk : '?') + '\n\n';
+
+    // Portas seriais — só as que existem
+    msg += 'Portas seriais:\n';
+    if (d.serial && Object.keys(d.serial).length > 0) {
+      Object.keys(d.serial).forEach(function(k) {
+        var info = d.serial[k];
+        var canW = info && (info.canWrite || info === true);
+        msg += (canW ? '  ✓ ' : '  ⚠ ') + k + (canW ? ' (escrita OK)' : ' (sem permissão)') + '\n';
+      });
+    } else {
+      msg += '  Nenhuma porta serial encontrada\n';
+    }
+
+    // CloudPOS — apenas as encontradas
+    var cpFound = false;
+    if (d.cloudpos) {
+      Object.keys(d.cloudpos).forEach(function(k) {
+        if (d.cloudpos[k]) {
+          msg += '  ✓ CloudPOS: ' + k + '\n';
+          cpFound = true;
+        }
+      });
+    }
+    if (!cpFound) msg += '\nCloudPOS: nenhuma classe encontrada\n';
+
+    printLog(msg, false);
+    // Também mostra no alert para fácil leitura
+    alert('DIAGNÓSTICO IMPRESSORA\n\n' + msg);
+  } catch(e) {
+    printLog('Erro no diagnóstico: ' + e.message, false);
+  }
+}
+
+function printLog(msg, ok) {
+  var el = document.getElementById('print-log');
+  if (!el) return;
+  el.style.display    = 'block';
+  // Acumula linhas; última linha define a cor do fundo
+  el.style.color      = ok ? '#1B5E20' : '#B71C1C';
+  el.style.background = ok ? '#E8F5E9' : '#FFEBEE';
+  var prev = el.textContent ? el.textContent + '\n' : '';
+  el.textContent = prev + msg;
+  el.scrollTop = el.scrollHeight;
+}
+function printLogClear() {
+  var el = document.getElementById('print-log');
+  if (el) { el.textContent = ''; el.style.display = 'none'; }
+}
+
+function imprimirTicket() {
+  printLogClear();
+  var btn = document.getElementById('btn-imprimir');
+  btn.textContent = '⏳ Imprimindo...'; btn.disabled = true;
+  function done(ok) {
+    btn.textContent = ok ? '✓ Impresso' : '🖨 Imprimir';
+    btn.disabled = false;
+  }
+
+  if (!window.NativePrinter) {
+    printLog('✗ NativePrinter não encontrado. Verifique se é o APK correto.', false);
+    done(false); return;
+  }
+
+  // ── 1. Tenta TEXTO primeiro (mais rápido e confiável no L500) ──────────
+  if (_ultimoComprovante) {
+    printLog('Enviando texto à impressora...', true);
+    try {
+      var raw = window.NativePrinter.printText(_ultimoComprovante);
+      var r1  = null;
+      try { r1 = JSON.parse(raw); } catch(e) {}
+      if (r1 && r1.ok) {
+        printLog('✓ Impresso via texto! Driver: ' + (r1.driver || 'cloudpos'), true);
+        done(true); return;
+      }
+      printLog('Texto falhou: ' + (r1 ? r1.error : raw) + '\nTentando bitmap...', false);
+    } catch(e) {
+      printLog('Exceção texto: ' + e.message + '\nTentando bitmap...', false);
+    }
+  }
+
+  // ── 2. Fallback: captura de tela (bitmap) ──────────────────────────────
+  printLog('Capturando tela para impressão...', true);
+
+  var _tmr = setTimeout(function() {
+    printLog('✗ Timeout: impressora não respondeu em 12s.', false);
+    done(false);
+  }, 12000);
+
+  window._printCallback = function(res) {
+    clearTimeout(_tmr);
+    if (res && res.ok) {
+      printLog('✓ Impresso via bitmap! Driver: ' + (res.driver || '?'), true);
+      done(true);
+    } else {
+      printLog('✗ Bitmap falhou: ' + ((res && res.error) || 'Desconhecido'), false);
+      done(false);
+    }
+  };
+
+  try {
+    window.NativePrinter.printScreen();
+  } catch(e) {
+    clearTimeout(_tmr);
+    printLog('✗ Exceção printScreen: ' + e.message, false);
+    done(false);
+  }
+}
+
+// ── Formata comprovante no padrão do bilhete real (papel 58mm ~24 colunas) ──
+function formatarComprovante(tid, total, apostas, res) {
+  var W   = 24;
+  var SEP = '------------------------'; // 24 traços
+
+  var now = new Date();
+  function fmtData(d) {
+    return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+
+           pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+  }
+  function brNum(n) { return Number(n).toFixed(2).replace('.', ','); }
+
+  // Quebra lista de números em linhas de até W chars
+  function wrapNums(entrada) {
+    var words = String(entrada || '').replace(/,/g,' ').trim().split(/\s+/);
+    var lines = [], line = '';
+    words.forEach(function(w) {
+      if (!w) return;
+      var test = line ? line + ' ' + w : w;
+      if (test.length > W) { if (line) { lines.push(line); line = w; } else { lines.push(w); } }
+      else { line = test; }
+    });
+    if (line) lines.push(line);
+    return lines.join('\n');
+  }
+
+  var op    = (st.user && st.user.name)  ? st.user.name  : 'OPERADOR';
+  var banca = (st.user && (st.user.banca_name || st.user.banca)) || 'SORTE OURO POS';
+  var ponto = (st.user && (st.user.point_name || st.user.ponto)) || '';
+
+  // Primeiro sorteio para o cabeçalho
+  var fd       = apostas.length ? apostas[0].draw : null;
+  var drawName = fd ? (fd.title || fd.name || '') : '';
+  var drawTime = fd ? (fd.draw_time || fd.time || '') : '';
+  if (drawTime && drawTime.length > 5) drawTime = drawTime.substring(11, 16); // HH:MM de ISO
+
+  // Poule: usa id da resposta ou parte numérica do ticket
+  var poule = res && (res.id || res.poule)
+    ? String(res.id || res.poule).padStart(6, '0')
+    : String(tid).replace(/\D/g,'').padStart(6,'0').slice(-6);
+
+  // Hash de verificação (32 hex chars)
+  var hash = gerarHashBilhete(String(tid) + String(total) + String(now.getTime()));
+
+  var t = '';
+  t += 'BILHETE\n';
+  t += 'NSU: ' + tid + '\n';
+  t += 'Data: ' + fmtData(now) + '\n';
+  t += 'AGUARDANDO RESULTADO\n';
+  t += banca + '\n';
+  if (ponto) t += ponto + '\n';
+  t += SEP + '\n';
+  t += 'Vendedor: ' + op.substring(0, 14) + '\n';
+  t += 'Poule: ' + poule + '\n';
+  t += 'Data: ' + fmtData(now) + '\n';
+  if (drawName) t += 'EXT: ' + drawName + (drawTime ? ' ' + drawTime + ' HS' : '') + '\n';
+  t += SEP + '\n';
+
+  // ── Formata bloco de apostas agrupado por números ──────────────────────────
+  // Ex: "Milhar (1º Prêmio)" e "Milhar 1º ao 5º" com mesmos números → um bloco só
+  // Bets idênticos (mesmo bet_type) são somados em uma linha
+
+  function baseModLabel(mod) {
+    var lbl = modLabel(mod);
+    // Remove sufixo de prêmio: "(1º Prêmio)", "1º ao 5º", "1 ao 3"...
+    return lbl.replace(/\s*[\(\d].*$/, '').trim() || lbl;
+  }
+
+  function prizeLabel(a) {
+    // Extrai sufixo de prêmio do label da modalidade
+    var lbl  = modLabel(a.mod);
+    var base = baseModLabel(a.mod);
+    var suf  = lbl.replace(base, '').trim().replace(/^\(|\)$/g, '').trim();
+    if (suf) return suf;
+    var cm = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
+    return cm > 1 ? '1/' + cm + 'P' : '1P';
+  }
+
+  // 1. Agrupar por números + base da modalidade
+  var grupos = [];
+  var grupoMap = {};
+  apostas.forEach(function(a) {
+    var base = baseModLabel(a.mod);
+    var key  = (a.entrada || '') + '||' + base;
+    if (!grupoMap[key]) {
+      grupoMap[key] = { base: base, entrada: a.entrada, items: [] };
+      grupos.push(grupoMap[key]);
+    }
+    grupoMap[key].items.push(a);
+  });
+
+  // 2. Imprimir cada grupo
+  grupos.forEach(function(g) {
+    t += g.base + '\n';
+    t += wrapNums(g.entrada) + '\n';
+
+    // Merge bets com mesmo bet_type → soma valores (ex: 2 bets 1P viram uma linha)
+    var mergedMap = {};
+    var mergedOrder = [];
+    g.items.forEach(function(a) {
+      var bt  = (a.mod && a.mod.bet_type) ? a.mod.bet_type.toLowerCase() : prizeLabel(a);
+      var cm  = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
+      var min = (a.mod && a.mod.min) || 1;
+      var cnt = (min > 1) ? 1 : (a.entrada ? a.entrada.split(',').length : 1);
+      var v   = Number(a.valor);
+      var tot = a.modo === 'd' ? (v * cm) : (v * cnt * cm);
+      if (!mergedMap[bt]) {
+        mergedMap[bt] = { plabel: prizeLabel(a), valor: 0, totBet: 0 };
+        mergedOrder.push(bt);
+      }
+      mergedMap[bt].valor  += v;
+      mergedMap[bt].totBet += tot;
+    });
+
+    mergedOrder.forEach(function(bt) {
+      var m = mergedMap[bt];
+      t += m.plabel + ' -> ' + brNum(m.valor) + ' = ' + brNum(m.totBet) + '\n';
+    });
+
+    t += SEP + '\n';
+  });
+
+  t += 'NSU: ' + tid + '\n';
+  t += 'Total: ' + brNum(total) + '\n';
+  t += hash + '\n';
+  t += 'VALIDADE 15 DIAS ( BOA SORTE)\n';
+  t += '\n\n';
+
+  return t;
+}
+
+// Hash 32 hex chars baseado no seed do bilhete
+function gerarHashBilhete(seed) {
+  var h1 = 0xDEADBEEF, h2 = 0x41C6CE57;
+  for (var i = 0; i < seed.length; i++) {
+    var c = seed.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 2654435761);
+    h2 = Math.imul(h2 ^ c, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
+  var parts = [h1>>>0, h2>>>0, (h1^h2)>>>0, (h1+h2)>>>0];
+  return parts.map(function(p){ return ('00000000'+p.toString(16).toUpperCase()).slice(-8); }).join('');
+}
+
+function centrar(str, w) {
+  if (str.length >= w) return str.substring(0, w);
+  var pad = Math.floor((w - str.length) / 2);
+  var s = '';
+  for (var i = 0; i < pad; i++) s += ' ';
+  return s + str;
+}
+
+function colunas(esq, dir, w) {
+  var spaces = w - esq.length - dir.length;
+  if (spaces < 1) spaces = 1;
+  var s = esq;
+  for (var i = 0; i < spaces; i++) s += ' ';
+  return s + dir;
+}
+
+// ─── Extras ──────────────────────────────────────────────────────────────────
+function abrirHistorico() {
+  api('/bets/my-bets').then(function(data) {
+    var lista = toArray(data);
+    if (!lista.length) { alert('Nenhuma aposta encontrada.'); return; }
+    var lines = lista.slice(0, 10).map(function(b) {
+      var valor = b.amount != null ? 'R$' + Number(b.amount).toFixed(2) : '';
+      return '#' + (b.ticket_id || '–') + '  ' + (b.draw_title || '–') +
+        '\n  ' + (b.bet_type || '') + '  Nº' + (b.numbers || '') + '  ' + valor;
+    });
+    alert('Últimas apostas:\n\n' + lines.join('\n\n'));
+  }).catch(function(e) { alert('Erro ao carregar histórico:\n' + e.message); });
+}
+function abrirCotacoes() {
+  if (!st.user || !st.user.region_id) { alert('Faça login para ver cotações.'); return; }
+  apiPublic('/regions/quotations/' + st.user.region_id).then(function(data) {
+    var lista = toArray(data);
+    if (!lista.length) { alert('Nenhuma cotação disponível para esta região.'); return; }
+    var lines = lista.map(function(c) {
+      return (c.bet_type || '–') + ': ' + (c.multiplier != null ? c.multiplier + 'x' : '–');
+    });
+    alert('Cotações – Região ' + st.user.region_id + ':\n\n' + lines.join('\n'));
+  }).catch(function(e) { alert('Erro ao carregar cotações:\n' + e.message); });
+}
+function aviso(f) { alert(f + '\nEm desenvolvimento.'); }
+</script>
+</body>
+</html>

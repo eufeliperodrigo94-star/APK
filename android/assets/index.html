@@ -1039,55 +1039,68 @@ function vCom()  { if (st.val.indexOf(',') < 0) { st.val = (st.val || '0') + ','
 function vClr()  { st.val = ''; updV(); }
 function vDel()  { if (st.val.length) { st.val = st.val.slice(0,-1); updV(); } }
 function updV() {
-  var v    = parseFloat((st.val || '0').replace(',','.')) || 0;
-  var cm   = (st.mod && st.mod.charge_multiplier) ? Number(st.mod.charge_multiplier) : 1;
-  var min  = (st.mod && st.mod.min) ? st.mod.min : 1;
-  var mult = (st.mod && st.mod.multiplier)        ? Number(st.mod.multiplier) : null;
+  var v     = parseFloat((st.val || '0').replace(',','.')) || 0;
+  var cm    = (st.mod && st.mod.charge_multiplier) ? Number(st.mod.charge_multiplier) : 1;
+  var min   = (st.mod && st.mod.min) ? st.mod.min : 1;
+  var mult  = (st.mod && st.mod.multiplier) ? Number(st.mod.multiplier) : null;
   var count = (min > 1) ? 1 : ((st.entrada ? st.entrada.split(',').length : 1) || 1);
 
-  var perNum_div = v > 0 ? v / count : 0;
-  var total_mul  = v * count;
-  var custo_div  = perNum_div * cm;
-  var custo_mul  = total_mul  * cm;
+  // ── Cálculos corretos ─────────────────────────────────────────────────────
+  // Dividir  : v = total nominal → por palpite = v/count
+  //            real API = (v/count) × count × cm = v × cm
+  // Multiplicar: v = por palpite → real = v × count × cm
+  var perNum  = count > 0 ? v / count : 0;
+  var realDiv = v * cm;
+  var realMul = v * count * cm;
 
-  // ── Barra JBet ──
   var jvbPremio  = document.getElementById('jvb-premio');
   var jvbValor   = document.getElementById('jvb-valor');
   var jvbTotal   = document.getElementById('jvb-total');
   var jvbFormula = document.getElementById('jvb-formula');
+
   if (jvbPremio) jvbPremio.textContent = mult ? mult + 'x' : '–';
   if (jvbValor)  jvbValor.textContent  = (st.val || '0');
 
-  var totalDisplay = st.modo === 'd'
-    ? (perNum_div * cm).toFixed(2).replace('.',',')
-    : custo_mul.toFixed(2).replace('.',',');
-  if (jvbTotal)  jvbTotal.textContent  = totalDisplay;
+  var totalReal = st.modo === 'd' ? realDiv : realMul;
+  var totalFmt  = totalReal.toFixed(2).replace('.',',');
+  if (jvbTotal) jvbTotal.textContent = totalFmt;
 
-  // Fórmula: "1 a 10P x 1,00 = 40,00"
+  // ── Fórmula legível ───────────────────────────────────────────────────────
   if (jvbFormula) {
-    var cmLabel = (cm <= 1) ? '1P' : '1/' + cm + 'P';
-    var valFmt  = v.toFixed(2).replace('.',',');
-    var totFmt  = totalDisplay;
-    if (count > 1 && st.modo === 'm') {
-      jvbFormula.textContent = '1 a ' + count + 'P × R$ ' + valFmt + ' = R$ ' + totFmt;
+    var vFmt   = v.toFixed(2).replace('.',',');
+    var perFmt = perNum.toFixed(2).replace('.',',');
+    var f = '';
+    if (st.modo === 'd') {
+      // Ex: "R$1,00 ÷ 4nº = R$0,25/nº × 5 sort. = R$5,00"
+      f = count > 1
+        ? 'R$ ' + vFmt + ' ÷ ' + count + ' nº = R$ ' + perFmt + '/nº'
+        : 'R$ ' + vFmt;
+      if (cm > 1) f += ' × ' + cm + ' sort. = R$ ' + totalFmt;
+      else        f += ' = R$ ' + totalFmt;
     } else {
-      jvbFormula.textContent = cmLabel + ' × R$ ' + valFmt + ' = R$ ' + totFmt;
+      // Ex: "4P × R$1,00 × 5 sort. = R$20,00"
+      f = count > 1 ? count + 'P × R$ ' + vFmt : 'R$ ' + vFmt;
+      if (cm > 1) f += ' × ' + cm + ' sort. = R$ ' + totalFmt;
+      else        f += ' = R$ ' + totalFmt;
     }
+    jvbFormula.textContent = f;
   }
 
-  // v-disp (escondido mas mantido para compat)
+  // v-disp oculto (compat)
   var vd = document.getElementById('v-disp');
   if (vd) vd.textContent = 'R$ ' + (st.val || '0');
 
-  var dtTxt = 'R$ ' + perNum_div.toFixed(2).replace('.',',') + '/nº';
-  var mtTxt = 'R$ ' + total_mul .toFixed(2).replace('.',',') + ' total';
-  if (cm > 1) {
-    dtTxt += ' (×' + cm + ' sort.)';
-    mtTxt += ' (real: R$ ' + custo_mul.toFixed(2).replace('.',',') + ')';
-  }
+  // Labels nos botões Dividir/Multiplicar
+  var perFmt2 = perNum.toFixed(2).replace('.',',');
+  var dtTxt = count > 1
+    ? 'R$ ' + perFmt2 + '/nº' + (cm > 1 ? ' (×' + cm + ' sort.)' : '')
+    : 'R$ ' + (v.toFixed(2).replace('.',',')) + (cm > 1 ? ' (×' + cm + ' sort.)' : '');
+  var mtTxt = 'R$ ' + (v * count).toFixed(2).replace('.',',') + ' total';
+  if (cm > 1) mtTxt += ' (real: R$ ' + realMul.toFixed(2).replace('.',',') + ')';
   document.getElementById('v-dt').textContent = dtTxt;
   document.getElementById('v-mt').textContent = mtTxt;
 }
+
 function setModo(m) { st.modo = m; updModo(); }
 function updModo() {
   document.getElementById('m-div').className = 'btn-modo ' + (st.modo === 'd' ? 'm-on' : 'm-off');

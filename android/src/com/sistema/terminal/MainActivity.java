@@ -3,14 +3,13 @@ package com.sistema.terminal;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.text.SpannableString;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -23,17 +22,22 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.CookieManager;
 
+import com.xcheng.printerservice.IPrinterCallback;
+import com.xcheng.printerservice.IPrinterService;
+
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends Activity {
 
     private WebView webView;
+    private PrinterBridge printerBridge;
 
-    @SuppressLint({"SetJavaScriptEnabled"})
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(android.os.Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(
@@ -61,8 +65,12 @@ public class MainActivity extends Activity {
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
-        webView.addJavascriptInterface(new PrinterBridge(this, webView), "NativePrinter");
+        printerBridge = new PrinterBridge(this, webView);
+        webView.addJavascriptInterface(printerBridge, "NativePrinter");
         webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+
+        // Tenta conectar ao serviço AIDL da impressora logo ao abrir
+        printerBridge.bindService();
 
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -99,6 +107,12 @@ public class MainActivity extends Activity {
         webView.loadUrl("file:///android_asset/index.html");
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        printerBridge.unbindService();
+    }
+
     @Override public void onBackPressed() {
         if (webView != null && webView.canGoBack()) webView.goBack();
         else super.onBackPressed();
@@ -111,78 +125,234 @@ public class MainActivity extends Activity {
         private final Activity act;
         private final WebView  wv;
 
-        // CloudPOS — Positivo L500 não tem, mas tentamos
-        private static final Object[][] CLOUDPOS_VARIANTS = {
-            {"com.cloudpos.POSTerminal",      8},
-            {"com.cloudpos.POSTerminal",      1},
-            {"com.cloudpos.jni.POSTerminal",  8},
-            {"com.cloudpos.jni.POSTerminal",  1},
-            {"xgd.cloudpos.POSTerminal",      8},
+        // Serviço AIDL XCheng (Positivo L500)
+        private volatile IPrinterService xchengService = null;
+        private volatile boolean         xchengBound   = false;
+
+        // Portas seriais — fallback
+        private static final String[] SERIAL_PORTS = {
+            "/dev/ttyS1", "/dev/ttyS0", "/dev/ttyS2"
         };
 
-        // Portas seriais — L500: ttyS1 e ttyS0 confirmados pelo diagnóstico
-        private static final String[] SERIAL_PORTS = {
-            "/dev/ttyS1",   // Positivo L500 ✓ (confirmado)
-            "/dev/ttyS0",   // Positivo L500 ✓ (confirmado)
-            "/dev/ttyS2",
-            "/dev/ttyS3",
+        // CloudPOS — fallback
+        private static final Object[][] CLOUDPOS_VARIANTS = {
+            {"com.cloudpos.POSTerminal", 8},
+            {"com.cloudpos.POSTerminal", 1},
+            {"com.cloudpos.jni.POSTerminal", 8},
         };
 
         PrinterBridge(Activity a, WebView w) { this.act = a; this.wv = w; }
 
-        @JavascriptInterface
-        public boolean isAvailable() { return true; }
+        // ── Bind XCheng AIDL ─────────────────────────────────────────────
+        void bindService() {
+            String[] pkgs = {"com.xcheng.printerservice"};
+            String[] actions = {
+                "com.xcheng.printer.PRINT_SERVICE",
+                "com.xcheng.printerservice.IPrinterService"
+            };
+            for (String pkg : pkgs) {
+                for (String action : actions) {
+                    try {
+                        Intent i = new Intent(action);
+                        i.setPackage(pkg);
+                        boolean ok = act.bindService(i, xchengConn, Context.BIND_AUTO_CREATE);
+                        if (ok) return;
+                    } catch (Exception ignored) {}
+                }
+            }
+        }
+
+        void unbindService() {
+            if (xchengBound) {
+                try { act.unbindService(xchengConn); } catch (Exception ignored) {}
+                xchengBound = false;
+                xchengService = null;
+            }
+        }
+
+        private final ServiceConnection xchengConn = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder binder) {
+                xchengService = IPrinterService.Stub.asInterface(binder);
+                xchengBound   = true;
+                try { xchengService.printerInit(noopCallback("init")); } catch (Exception ignored) {}
+            }
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                xchengService = null;
+                xchengBound   = false;
+            }
+        };
 
         // ── Diagnóstico ──────────────────────────────────────────────────
         @JavascriptInterface
         public String diagnose() {
-            StringBuilder sb = new StringBuilder("{\"serial\":{");
+            StringBuilder sb = new StringBuilder("{");
+
+            // XCheng AIDL
+            sb.append("\"xcheng\":{\"bound\":").append(xchengBound)
+              .append(",\"service\":").append(xchengService != null).append("},");
+
+            // Serial
+            sb.append("\"serial\":{");
             for (String port : SERIAL_PORTS) {
                 File f = new File(port);
-                if (!f.exists()) continue;
-                sb.append("\"").append(port).append("\":{")
-                  .append("\"exists\":true,\"canWrite\":").append(f.canWrite()).append("},");
+                if (f.exists()) {
+                    sb.append("\"").append(port).append("\":{\"exists\":true,\"canWrite\":")
+                      .append(f.canWrite()).append("},");
+                }
             }
             if (sb.charAt(sb.length()-1) == ',') sb.setLength(sb.length()-1);
-            sb.append("},\"cloudpos\":{");
-            for (Object[] v : CLOUDPOS_VARIANTS) {
-                String cls = (String) v[0];
-                boolean found = false;
-                try { Class.forName(cls); found = true; } catch (Exception e) {}
-                if (found) sb.append("\"").append(cls).append("\":true,");
-            }
-            if (sb.charAt(sb.length()-1) == ',') sb.setLength(sb.length()-1);
-            sb.append("},\"device\":{");
-            sb.append("\"model\":\"").append(esc(android.os.Build.MODEL)).append("\",");
-            sb.append("\"brand\":\"").append(esc(android.os.Build.BRAND)).append("\",");
-            sb.append("\"hardware\":\"").append(esc(android.os.Build.HARDWARE)).append("\",");
-            sb.append("\"sdk\":").append(android.os.Build.VERSION.SDK_INT);
-            sb.append("}}");
+            sb.append("},");
+
+            // Device
+            sb.append("\"device\":{\"model\":\"").append(esc(android.os.Build.MODEL))
+              .append("\",\"brand\":\"").append(esc(android.os.Build.BRAND))
+              .append("\",\"sdk\":").append(android.os.Build.VERSION.SDK_INT)
+              .append("}}");
             return sb.toString();
         }
 
-        // ── printText ────────────────────────────────────────────────────
+        @JavascriptInterface
+        public boolean isAvailable() { return true; }
+
+        // ── printText: AIDL → ESC/POS serial → CloudPOS → Intents ───────
         @JavascriptInterface
         public String printText(String text) {
             StringBuilder log = new StringBuilder();
 
-            // 1. CloudPOS
+            // 1. XCheng AIDL (serviço nativo do Positivo L500)
+            if (xchengService != null) {
+                String r = tryXchengPrint(text, log);
+                if (r != null) return r;
+            } else {
+                log.append("[xcheng:nao_vinculado]");
+                // Tenta reconectar
+                bindService();
+                // Aguarda 1s para o bind
+                try { Thread.sleep(1000); } catch (Exception ignored) {}
+                if (xchengService != null) {
+                    String r = tryXchengPrint(text, log);
+                    if (r != null) return r;
+                }
+            }
+
+            // 2. ESC/POS serial direto (com chmod)
+            String r2 = tryEscPosSerial(text, log);
+            if (r2 != null) return r2;
+
+            // 3. CloudPOS
             for (Object[] v : CLOUDPOS_VARIANTS) {
                 String r = tryCloudPos((String)v[0], (Integer)v[1], text, log);
                 if (r != null) return r;
             }
 
-            // 2. ESC/POS serial (com chmod automático)
-            String r2 = tryEscPosSerial(text, log);
-            if (r2 != null) return r2;
-
-            // 3. Intents OEM
+            // 4. Intents OEM
             tryOemIntents(text);
             log.append("[intents_sent]");
 
             return "{\"ok\":false,\"error\":\"" + esc(log.toString()) + "\"}";
         }
 
+        // ── XCheng AIDL — tentativas ──────────────────────────────────────
+        private String tryXchengPrint(String text, StringBuilder log) {
+            // a) printText nativo
+            try {
+                final CountDownLatch latch = new CountDownLatch(1);
+                final boolean[] ok = {true};
+                final String[]  err = {null};
+
+                xchengService.printText(text, new IPrinterCallback.Stub() {
+                    @Override public void onException(int code, String msg) {
+                        ok[0] = false; err[0] = code + ":" + msg; latch.countDown();
+                    }
+                    @Override public void onLength(long c, long t) {}
+                    @Override public void onRealLength(double c, double t) {}
+                    @Override public void onComplete() { latch.countDown(); }
+                });
+
+                // Feed + corte via sendRAWData
+                xchengService.printWrapPaper(4, noopCallback("feed"));
+
+                latch.await(5, TimeUnit.SECONDS);
+
+                if (ok[0]) {
+                    return "{\"ok\":true,\"driver\":\"xcheng-aidl-text\"}";
+                } else {
+                    log.append("[xcheng-text:").append(esc(err[0])).append("]");
+                }
+            } catch (Exception e) {
+                log.append("[xcheng-text:").append(esc(e.getMessage())).append("]");
+            }
+
+            // b) sendRAWData com ESC/POS bytes (mais compatível)
+            try {
+                byte[] escPosData = buildEscPosBytes(text);
+                final CountDownLatch latch2 = new CountDownLatch(1);
+                final boolean[] ok2 = {true};
+
+                xchengService.sendRAWData(escPosData, new IPrinterCallback.Stub() {
+                    @Override public void onException(int code, String msg) {
+                        ok2[0] = false; latch2.countDown();
+                    }
+                    @Override public void onLength(long c, long t) {}
+                    @Override public void onRealLength(double c, double t) {}
+                    @Override public void onComplete() { latch2.countDown(); }
+                });
+
+                latch2.await(5, TimeUnit.SECONDS);
+
+                if (ok2[0]) {
+                    return "{\"ok\":true,\"driver\":\"xcheng-aidl-raw\"}";
+                } else {
+                    log.append("[xcheng-raw:falhou]");
+                }
+            } catch (Exception e) {
+                log.append("[xcheng-raw:").append(esc(e.getMessage())).append("]");
+            }
+
+            return null;
+        }
+
+        // ── ESC/POS serial (fallback) ─────────────────────────────────────
+        private String tryEscPosSerial(String text, StringBuilder log) {
+            for (String port : SERIAL_PORTS) {
+                File f = new File(port);
+                if (!f.exists()) continue;
+                try { Runtime.getRuntime().exec(new String[]{"chmod","666",port}).waitFor(1500,TimeUnit.MILLISECONDS); } catch (Exception ignored) {}
+                try { Runtime.getRuntime().exec(new String[]{"su","-c","chmod 666 "+port}).waitFor(2000,TimeUnit.MILLISECONDS); } catch (Exception ignored) {}
+                try {
+                    FileOutputStream fos = new FileOutputStream(f);
+                    fos.write(buildEscPosBytes(text));
+                    fos.flush(); fos.close();
+                    return "{\"ok\":true,\"driver\":\"escpos-serial\",\"port\":\"" + esc(port) + "\"}";
+                } catch (Exception e) {
+                    log.append("[").append(port).append(":").append(esc(e.getMessage())).append("]");
+                }
+            }
+            return null;
+        }
+
+        // ── ESC/POS bytes ─────────────────────────────────────────────────
+        private byte[] buildEscPosBytes(String text) throws Exception {
+            byte[] init  = {0x1B, 0x40};           // ESC @ init
+            byte[] enc   = {0x1B, 0x74, 0x10};     // ESC t 16 ISO-8859-1
+            byte[] textB = text.getBytes("ISO-8859-1");
+            byte[] feed  = {0x0A,0x0A,0x0A,0x0A,0x0A};
+            byte[] cut   = {0x1D, 0x56, 0x41, 0x00};
+
+            int len = init.length + enc.length + textB.length + feed.length + cut.length;
+            byte[] out = new byte[len];
+            int p = 0;
+            System.arraycopy(init,  0, out, p, init.length);  p += init.length;
+            System.arraycopy(enc,   0, out, p, enc.length);   p += enc.length;
+            System.arraycopy(textB, 0, out, p, textB.length); p += textB.length;
+            System.arraycopy(feed,  0, out, p, feed.length);  p += feed.length;
+            System.arraycopy(cut,   0, out, p, cut.length);
+            return out;
+        }
+
+        // ── CloudPOS ─────────────────────────────────────────────────────
         private String tryCloudPos(String cls, int devType, String text, StringBuilder log) {
             try {
                 Class<?> tc = Class.forName(cls);
@@ -193,65 +363,29 @@ public class MainActivity extends Activity {
                 try { pc = Class.forName("com.cloudpos.device.printer.PrinterDevice"); }
                 catch (ClassNotFoundException e) { pc = Class.forName("com.cloudpos.device.PrinterDevice"); }
                 Object printer = tc.getMethod("getDevice", int.class).invoke(terminal, devType);
-                if (printer == null) { log.append("[").append(cls).append(":null]"); return null; }
-                try { pc.getMethod("open", int.class, Bundle.class).invoke(printer, 0, null); }
-                catch (NoSuchMethodException e) {
-                    try { pc.getMethod("open", int.class).invoke(printer, 0); }
-                    catch (NoSuchMethodException e2) { pc.getMethod("open").invoke(printer); }
-                }
-                try { pc.getMethod("printText", String.class).invoke(printer, text); }
-                catch (NoSuchMethodException e) {
-                    SpannableString ss = new SpannableString(text + "\n\n\n\n\n");
-                    pc.getMethod("print", SpannableString.class).invoke(printer, ss);
-                }
+                if (printer == null) return null;
+                try { pc.getMethod("open", int.class, android.os.Bundle.class).invoke(printer, 0, null); }
+                catch (NoSuchMethodException e) { pc.getMethod("open").invoke(printer); }
+                android.text.SpannableString ss = new android.text.SpannableString(text + "\n\n\n\n\n");
+                try { pc.getMethod("print", android.text.SpannableString.class).invoke(printer, ss); }
+                catch (Exception e) { pc.getMethod("printText", String.class).invoke(printer, text); }
                 try { pc.getMethod("waitUntilFinish", int.class).invoke(printer, 8000); }
                 catch (Exception ignored) { Thread.sleep(3000); }
                 try { pc.getMethod("close").invoke(printer); } catch (Exception ignored) {}
-                return "{\"ok\":true,\"driver\":\"cloudpos\",\"class\":\"" + esc(cls) + "\"}";
-            } catch (ClassNotFoundException e) {
-                // silencioso — classe não existe no device
+                return "{\"ok\":true,\"driver\":\"cloudpos\"}";
+            } catch (ClassNotFoundException ignored) {
             } catch (Exception e) {
                 log.append("[cp:").append(esc(e.getClass().getSimpleName())).append("]");
             }
             return null;
         }
 
-        private String tryEscPosSerial(String text, StringBuilder log) {
-            for (String port : SERIAL_PORTS) {
-                File f = new File(port);
-                if (!f.exists()) continue;
-                // chmod sem root
-                try {
-                    Process p = Runtime.getRuntime().exec(new String[]{"chmod", "666", port});
-                    p.waitFor(1500, TimeUnit.MILLISECONDS);
-                } catch (Exception ignored) {}
-                // chmod com su
-                try {
-                    Process p = Runtime.getRuntime().exec(new String[]{"su", "-c", "chmod 666 " + port});
-                    p.waitFor(2000, TimeUnit.MILLISECONDS);
-                } catch (Exception ignored) {}
-                try {
-                    FileOutputStream fos = new FileOutputStream(f);
-                    fos.write(new byte[]{0x1B, 0x40});            // ESC @ init
-                    fos.write(new byte[]{0x1B, 0x74, 0x10});      // ESC t 16 ISO-8859-1
-                    fos.write(text.getBytes("ISO-8859-1"));
-                    fos.write(new byte[]{0x0A,0x0A,0x0A,0x0A,0x0A}); // 5 line feeds
-                    fos.write(new byte[]{0x1D, 0x56, 0x41, 0x00});    // GS V A — corte parcial
-                    fos.flush(); fos.close();
-                    return "{\"ok\":true,\"driver\":\"escpos\",\"port\":\"" + esc(port) + "\"}";
-                } catch (Exception e) {
-                    log.append("[").append(port).append(":").append(esc(e.getMessage())).append("]");
-                }
-            }
-            return null;
-        }
-
+        // ── Intents OEM ───────────────────────────────────────────────────
         private void tryOemIntents(String text) {
             String[] actions = {
                 "com.positivo.printer.action.PRINT",
                 "com.pozitron.printer.PRINT",
-                "com.cloudpos.printer.PRINT",
-                "com.device.printer.PRINT",
+                "com.xcheng.printer.PRINT",
             };
             for (String action : actions) {
                 try {
@@ -266,9 +400,18 @@ public class MainActivity extends Activity {
         public void printScreen() {
             act.runOnUiThread(new Runnable() {
                 @Override public void run() {
-                    cbJS("{\"ok\":false,\"error\":\"Bitmap: sem SDK no L500\"}");
+                    cbJS("{\"ok\":false,\"error\":\"Use ESC/POS ou AIDL\"}");
                 }
             });
+        }
+
+        private IPrinterCallback noopCallback(final String label) {
+            return new IPrinterCallback.Stub() {
+                @Override public void onException(int code, String msg) {}
+                @Override public void onLength(long c, long t) {}
+                @Override public void onRealLength(double c, double t) {}
+                @Override public void onComplete() {}
+            };
         }
 
         private void cbJS(final String json) {

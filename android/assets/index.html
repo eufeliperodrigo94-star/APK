@@ -1162,7 +1162,7 @@ function finBilhete() {
       var tid   = res.ticketId   || res.ticket_id   || '–';
       var total = Number(res.totalAmount || res.total_amount || 0).toFixed(2);
 
-      _ultimoComprovante = formatarComprovante(tid, total, apostasEnviadas);
+      _ultimoComprovante = formatarComprovante(tid, total, apostasEnviadas, res);
 
       var det = '';
       apostasEnviadas.forEach(function(a, i) {
@@ -1332,45 +1332,100 @@ function imprimirTicket() {
   }
 }
 
-// Formata comprovante em 32 colunas (papel 58mm)
-function formatarComprovante(tid, total, apostas) {
-  var W   = 32;
-  var SEP = '--------------------------------'; // 32 chars
+// ── Formata comprovante no padrão do bilhete real (papel 58mm ~24 colunas) ──
+function formatarComprovante(tid, total, apostas, res) {
+  var W   = 24;
+  var SEP = '------------------------'; // 24 traços
+
   var now = new Date();
-  var data = pad(now.getDate()) + '/' + pad(now.getMonth()+1) + '/' + now.getFullYear() +
-             ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
-  var op = (st.user && st.user.name) ? st.user.name : '';
+  function fmtData(d) {
+    return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+
+           pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+  }
+  function brNum(n) { return Number(n).toFixed(2).replace('.', ','); }
+
+  // Quebra lista de números em linhas de até W chars
+  function wrapNums(entrada) {
+    var words = String(entrada || '').replace(/,/g,' ').trim().split(/\s+/);
+    var lines = [], line = '';
+    words.forEach(function(w) {
+      if (!w) return;
+      var test = line ? line + ' ' + w : w;
+      if (test.length > W) { if (line) { lines.push(line); line = w; } else { lines.push(w); } }
+      else { line = test; }
+    });
+    if (line) lines.push(line);
+    return lines.join('\n');
+  }
+
+  var op    = (st.user && st.user.name)  ? st.user.name  : 'OPERADOR';
+  var banca = (st.user && (st.user.banca_name || st.user.banca)) || 'SORTE OURO POS';
+  var ponto = (st.user && (st.user.point_name || st.user.ponto)) || '';
+
+  // Primeiro sorteio para o cabeçalho
+  var fd       = apostas.length ? apostas[0].draw : null;
+  var drawName = fd ? (fd.title || fd.name || '') : '';
+  var drawTime = fd ? (fd.draw_time || fd.time || '') : '';
+  if (drawTime && drawTime.length > 5) drawTime = drawTime.substring(11, 16); // HH:MM de ISO
+
+  // Poule: usa id da resposta ou parte numérica do ticket
+  var poule = res && (res.id || res.poule)
+    ? String(res.id || res.poule).padStart(6, '0')
+    : String(tid).replace(/\D/g,'').padStart(6,'0').slice(-6);
+
+  // Hash de verificação (32 hex chars)
+  var hash = gerarHashBilhete(String(tid) + String(total) + String(now.getTime()));
 
   var t = '';
-  t += centrar('SORTE OURO POS', W) + '\n';
-  t += centrar('COMPROVANTE DE APOSTA', W) + '\n';
+  t += 'BILHETE\n';
+  t += 'NSU: ' + tid + '\n';
+  t += 'Data: ' + fmtData(now) + '\n';
+  t += 'AGUARDANDO RESULTADO\n';
+  t += banca + '\n';
+  if (ponto) t += ponto + '\n';
   t += SEP + '\n';
-  t += 'Bilhete : ' + String(tid).substring(0, 20) + '\n';
-  t += 'Data    : ' + data + '\n';
-  if (op) t += 'Operador: ' + op.substring(0, 22) + '\n';
+  t += 'Vendedor: ' + op.substring(0, 14) + '\n';
+  t += 'Poule: ' + poule + '\n';
+  t += 'Data: ' + fmtData(now) + '\n';
+  if (drawName) t += 'EXT: ' + drawName + (drawTime ? ' ' + drawTime + ' HS' : '') + '\n';
   t += SEP + '\n';
 
-  apostas.forEach(function(a, i) {
-    var lbl = modLabel(a.mod);
-    var cm  = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
-    var tot = totalAposta(a);
-    t += (i + 1) + '. ' + lbl.substring(0, W - 3) + '\n';
-    t += '   Numeros: ' + a.entrada + '\n';
-    t += '   Sorteio: ' + (a.draw.title || '').substring(0, 20) + '\n';
-    t += '   Valor  : R$ ' + tot.toFixed(2) + '\n';
-    if (cm > 1) {
-      t += '   Custo  : R$ ' + (tot * cm).toFixed(2) + ' x' + cm + '\n';
-    }
+  apostas.forEach(function(a) {
+    var lbl   = modLabel(a.mod);
+    var cm    = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
+    var min   = (a.mod && a.mod.min) || 1;
+    var count = (min > 1) ? 1 : (a.entrada ? a.entrada.split(',').length : 1);
+    var valor = Number(a.valor);
+    var totBet = valor * count * cm;
+    var cmLabel = (cm <= 1) ? '1P' : '1/' + cm + 'P';
+
+    t += lbl + '\n';
+    t += wrapNums(a.entrada) + '\n';
+    t += cmLabel + ' -> ' + brNum(valor) + ' = ' + brNum(totBet) + '\n';
+    t += SEP + '\n';
   });
 
-  t += SEP + '\n';
-  t += colunas('TOTAL PAGO:', 'R$ ' + Number(total).toFixed(2), W) + '\n';
-  t += SEP + '\n';
-  t += centrar('Obrigado e boa sorte!', W) + '\n';
-  t += centrar('Guarde este comprovante', W) + '\n';
-  t += '\n\n'; // avança papel antes de cortar
+  t += 'NSU: ' + tid + '\n';
+  t += 'Total: ' + brNum(total) + '\n';
+  t += hash + '\n';
+  t += 'VALIDADE 15 DIAS ( BOA SORTE)\n';
+  t += '\n\n';
 
   return t;
+}
+
+// Hash 32 hex chars baseado no seed do bilhete
+function gerarHashBilhete(seed) {
+  var h1 = 0xDEADBEEF, h2 = 0x41C6CE57;
+  for (var i = 0; i < seed.length; i++) {
+    var c = seed.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 2654435761);
+    h2 = Math.imul(h2 ^ c, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
+  var parts = [h1>>>0, h2>>>0, (h1^h2)>>>0, (h1+h2)>>>0];
+  return parts.map(function(p){ return ('00000000'+p.toString(16).toUpperCase()).slice(-8); }).join('');
 }
 
 function centrar(str, w) {

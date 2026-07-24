@@ -359,6 +359,33 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
   padding: 6px 8px; -webkit-flex-shrink: 0; flex-shrink: 0;
   letter-spacing: .3px; border-bottom: 1px solid #C8E6C9;
 }
+
+/* ══════════ LISTA JOGOS (RSM) ══════════ */
+.jogo-item {
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  padding: 9px 12px; border-bottom: 1px solid #E3F2FD;
+  background: #FFF;
+}
+.jogo-info { -webkit-flex: 1; flex: 1; }
+.jogo-nome { font-size: 13px; font-weight: 700; color: #1565C0; }
+.jogo-nums { font-size: 12px; color: #555; letter-spacing: 1px; }
+.jogo-form { font-size: 12px; color: #388E3C; font-weight: 600; margin-top: 1px; }
+.jogo-del  { background: none; border: none; color: #E53935; font-size: 20px; padding: 4px 6px; cursor: pointer; }
+.rsm-total-bar {
+  display: -webkit-flex; display: flex;
+  -webkit-justify-content: space-between; justify-content: space-between;
+  -webkit-align-items: center; align-items: center;
+  background: #1565C0; color: #FFF;
+  padding: 10px 14px; -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.rsm-total-bar .tot-lbl { font-size: 12px; opacity: .8; }
+.rsm-total-bar .tot-val { font-size: 22px; font-weight: 700; color: #A5D6A7; }
+.btn-add-jogo {
+  display: block; width: calc(100% - 24px); margin: 8px 12px;
+  height: 44px; background: #1976D2; color: #FFF;
+  border: none; border-radius: 7px; font-size: 14px; font-weight: 700; cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -556,11 +583,15 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
 <!-- ═══════════ DIALOG CLONAR ═══════════ -->
 <div class="dlg-bg" id="dlg">
   <div class="dlg">
-    <div class="dlg-title">Palpite adicionado!</div>
-    <div class="dlg-msg">Deseja adicionar mais ou finalizar?</div>
-    <div class="dlg-btns">
-      <button onclick="clonar()">CLONAR</button>
-      <button onclick="finAp()" style="margin-left:16px">FINALIZAR</button>
+    <div class="dlg-title">Jogo adicionado!</div>
+    <div class="dlg-msg" id="dlg-resumo-linha" style="font-family:monospace;font-size:13px;color:#1565C0;margin-bottom:10px"></div>
+    <div class="dlg-msg">Deseja adicionar mais?</div>
+    <div class="dlg-btns" style="-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:flex-end;align-items:flex-end;gap:8px">
+      <div style="display:-webkit-flex;display:flex;gap:8px">
+        <button onclick="novoJogo()" style="color:#388E3C">+ NOVO JOGO</button>
+        <button onclick="clonar()" style="color:#1565C0">REPETIR</button>
+      </div>
+      <button onclick="finAp()" style="color:#E53935">FINALIZAR →</button>
     </div>
   </div>
 </div>
@@ -1122,10 +1153,30 @@ function vOk() {
       ', o valor por número seria R$ ' + amtCheck.toFixed(2)); return;
   }
   st.apostas.push({ draw: st.draw, mod: st.mod, entrada: st.entrada, valor: v, modo: st.modo });
+  // Atualiza linha de resumo no dialog
+  var lbl  = modLabel(st.mod);
+  var cm   = (st.mod && st.mod.charge_multiplier) ? Number(st.mod.charge_multiplier) : 1;
+  var cnt  = (st.mod && st.mod.min > 1) ? 1 : ((st.entrada ? st.entrada.split(',').length : 1) || 1);
+  var real = st.modo === 'd' ? (v * cm) : (v * cnt * cm);
+  var cmLbl = cm > 1 ? '1 a ' + cm + 'P' : '1P';
+  var dlgLinha = document.getElementById('dlg-resumo-linha');
+  if (dlgLinha) dlgLinha.textContent = lbl + ' → ' + cmLbl + ' × R$ ' + v.toFixed(2).replace('.',',') + ' = R$ ' + real.toFixed(2).replace('.',',');
+  // Total acumulado
+  var totAc = 0;
+  st.apostas.forEach(function(a) {
+    var ac = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
+    var nc = (a.mod && a.mod.min > 1) ? 1 : ((a.entrada ? a.entrada.split(',').length : 1) || 1);
+    totAc += a.modo === 'd' ? (a.valor * ac) : (a.valor * nc * ac);
+  });
   document.getElementById('dlg').classList.add('on');
 }
 function clonar() { document.getElementById('dlg').classList.remove('on'); st.val = ''; updV(); }
 function finAp()  { document.getElementById('dlg').classList.remove('on'); go('s-rsm'); }
+function novoJogo() {
+  document.getElementById('dlg').classList.remove('on');
+  // Mantém o mesmo sorteio, volta para escolher modalidade
+  go('s-tipo');
+}
 
 // ─── Resumo ──────────────────────────────────────────────────────────────────
 function totalAposta(a) {
@@ -1144,71 +1195,77 @@ function totalCustoReal(apostas) {
 }
 
 function buildRsm() {
-  var tot       = 0;
-  var custoReal = 0;
-  st.apostas.forEach(function(a) { tot += totalAposta(a); });
-  custoReal = totalCustoReal(st.apostas);
-  document.getElementById('rsm-tot').textContent = 'R$ ' + tot.toFixed(2).replace('.',',');
+  // ── Calcula totais ──────────────────────────────────────────────────────
+  var totReal = 0;
+  st.apostas.forEach(function(a) {
+    var cm  = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
+    var cnt = (a.mod && a.mod.min > 1) ? 1 : ((a.entrada ? a.entrada.split(',').length : 1) || 1);
+    totReal += a.modo === 'd' ? (a.valor * cm) : (a.valor * cnt * cm);
+  });
 
-  // Custo real (com charge_multiplier)
+  // ── Cabeçalho resumo ───────────────────────────────────────────────────
+  document.getElementById('rsm-tot').textContent = 'R$ ' + totReal.toFixed(2).replace('.',',');
   var custoEl = document.getElementById('rsm-custo');
-  if (custoEl) {
-    if (custoReal > tot + 0.001) {
-      custoEl.style.display = '';
-      custoEl.textContent = '⚠ Custo real: R$ ' + custoReal.toFixed(2).replace('.',',');
-    } else {
-      custoEl.style.display = 'none';
-    }
-  }
-
-  // Saldo do operador
-  var saldo     = st.user ? Number(st.user.balance || 0) : 0;
-  var saldoEl   = document.getElementById('rsm-saldo');
+  if (custoEl) custoEl.style.display = 'none';
+  var saldoEl = document.getElementById('rsm-saldo');
+  var saldo   = st.user ? Number(st.user.balance || 0) : 0;
   if (saldoEl && st.user) {
-    var corSaldo = saldo < custoReal ? '#FF8A80' : 'rgba(255,255,255,.75)';
-    saldoEl.style.color = corSaldo;
+    saldoEl.style.color = saldo < totReal ? '#FF8A80' : 'rgba(255,255,255,.75)';
     saldoEl.textContent = 'Saldo: R$ ' + saldo.toFixed(2).replace('.',',');
   }
 
   var exts = [];
   st.apostas.forEach(function(a) { if (exts.indexOf(a.draw.title) < 0) exts.push(a.draw.title); });
-  document.getElementById('rsm-exts').textContent = 'Válido para:\n' + (exts.join('\n') || '–');
+  document.getElementById('rsm-exts').textContent = 'Válido para: ' + (exts.join(', ') || '–');
 
   var list = document.getElementById('rsm-list');
   var vz   = document.getElementById('rsm-vz');
   var btn  = document.getElementById('btn-fin');
   list.innerHTML = '';
 
-  if (!st.apostas.length) { list.style.display = 'none'; vz.style.display = ''; btn.disabled = true; return; }
+  if (!st.apostas.length) {
+    list.style.display = 'none'; vz.style.display = ''; btn.disabled = true; return;
+  }
   list.style.display = 'block'; vz.style.display = 'none'; btn.disabled = false;
 
-  st.apostas.forEach(function(a, i) {
-    var min   = (a.mod && a.mod.min) || 1;
-    var cm    = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
-    var count = (min > 1) ? 1 : (a.entrada ? a.entrada.split(',').length : 1);
+  // ── Barra de total ─────────────────────────────────────────────────────
+  var totBar = document.createElement('div');
+  totBar.className = 'rsm-total-bar';
+  totBar.innerHTML = '<div><div class="tot-lbl">Total (' + st.apostas.length + ' jogo(s))</div></div>' +
+    '<div class="tot-val">R$ ' + totReal.toFixed(2).replace('.',',') + '</div>';
+  list.appendChild(totBar);
 
-    var amtPer = a.modo === 'd'
-      ? (a.valor / count).toFixed(2)
-      : a.valor.toFixed(2);
-    var totalLinha = totalAposta(a).toFixed(2);
-    var custoReal  = (parseFloat(totalLinha) * cm).toFixed(2);
-    var modoStr    = a.modo === 'd' ? 'Dividir' : 'Multiplicar';
-    var cmStr      = cm > 1 ? '<br><span style="color:#FFA726;font-size:12px">⚠ Custo real: R$ ' + custoReal + ' (' + cm + ' sorteios)</span>' : '';
+  // ── Botão Adicionar Jogo ───────────────────────────────────────────────
+  var addBtn = document.createElement('button');
+  addBtn.className = 'btn-add-jogo';
+  addBtn.textContent = '+ Adicionar Jogo';
+  addBtn.onclick = function() { go('s-ext'); };
+  list.appendChild(addBtn);
+
+  // ── Lista compacta de jogos ────────────────────────────────────────────
+  st.apostas.forEach(function(a, i) {
+    var cm   = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
+    var min  = (a.mod && a.mod.min) || 1;
+    var cnt  = (min > 1) ? 1 : ((a.entrada ? a.entrada.split(',').length : 1) || 1);
+    var real = a.modo === 'd' ? (a.valor * cm) : (a.valor * cnt * cm);
+    var cmLbl = cm > 1 ? '1 a ' + cm + 'P' : '1P';
+    var vFmt  = a.valor.toFixed(2).replace('.',',');
+    var rFmt  = real.toFixed(2).replace('.',',');
+    var forma = cmLbl + ' × R$ ' + vFmt + ' = R$ ' + rFmt;
 
     var div = document.createElement('div');
-    div.className = 'ap-item';
+    div.className = 'jogo-item';
     div.innerHTML =
-      '<div class="ap-info">' +
-        '<strong>' + modLabel(a.mod) + '</strong><br>' +
-        'Nº: ' + a.entrada + (min > 1 ? ' <small>(combo)</small>' : ' (' + count + ' palpite(s))') + '<br>' +
-        'Sorteio: ' + a.draw.title + '<br>' +
-        'Modo: ' + modoStr + ' — R$ ' + amtPer + '/nº<br>' +
-        '<b>Total: R$ ' + totalLinha + '</b>' + cmStr +
+      '<div class="jogo-info">' +
+        '<div class="jogo-nome">' + modLabel(a.mod) + '</div>' +
+        '<div class="jogo-nums">' + (a.entrada || '').replace(/,/g, '  ') + '</div>' +
+        '<div class="jogo-form">' + forma + '</div>' +
       '</div>' +
-      '<button class="btn-del-ap" onclick="remAp(' + i + ')">🗑</button>';
+      '<button class="jogo-del" onclick="remAp(' + i + ')">✕</button>';
     list.appendChild(div);
   });
 }
+
 function remAp(i) { st.apostas.splice(i, 1); buildRsm(); }
 function cancelar() {
   if (!st.apostas.length) { go('s-main'); return; }

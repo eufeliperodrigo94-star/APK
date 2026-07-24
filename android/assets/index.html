@@ -198,19 +198,43 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
 .n-lista-wrap {
   -webkit-flex: 1; flex: 1;
   overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 8px 10px; background: #F5F5F5;
+  padding: 10px 12px; background: #F5F5F5;
   border-bottom: 1px solid #DDD;
+  font-size: 22px; font-weight: 700;
+  color: #1565C0; letter-spacing: 4px; line-height: 1.85;
+  word-break: break-all;
+}
+.n-chip { display: none; }
+.n-chip-del { display: none; }
+/* Barra JBet: Prêmio / palpites / ✕ */
+.jbet-info {
   display: -webkit-flex; display: flex;
-  -webkit-flex-wrap: wrap; flex-wrap: wrap;
-  -webkit-align-content: flex-start; align-content: flex-start;
+  -webkit-align-items: center; align-items: center;
+  background: #c8c8c8; padding: 6px 10px;
+  border-top: 1px solid #aaa; -webkit-flex-shrink: 0; flex-shrink: 0;
+  gap: 8px;
 }
-.n-chip {
-  background: #1565C0; color: #FFF; border: none;
-  padding: 5px 13px; border-radius: 20px;
-  font-size: 17px; font-weight: 700; margin: 3px; letter-spacing: 3px;
-  -webkit-flex-shrink: 0; flex-shrink: 0;
+.jbi-box {
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: column; flex-direction: column;
+  -webkit-align-items: center; align-items: center;
+  background: #fff; border-radius: 5px;
+  padding: 2px 8px; min-width: 52px;
 }
-.n-chip-del { background: #E53935; cursor: pointer; letter-spacing: 0; font-size: 15px; }
+.jbi-lbl { font-size: 10px; color: #666; font-weight: 600; text-transform: uppercase; }
+.jbi-val { font-size: 18px; font-weight: 700; color: #212121; line-height: 1.2; }
+.jbi-sep { font-size: 13px; color: #666; font-weight: 600; }
+.jbi-del { background: #E53935; border: none; color: #fff;
+  border-radius: 50%; width: 38px; height: 38px; font-size: 18px;
+  cursor: pointer; display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center; }
+.jbet-formula {
+  background: #E8F5E9; color: #2E7D32;
+  text-align: center; font-size: 13px; font-weight: 700;
+  padding: 5px; -webkit-flex-shrink: 0; flex-shrink: 0;
+  letter-spacing: .5px;
+}
 
 .teclado-row { display: -webkit-flex; display: flex; -webkit-flex-shrink: 0; flex-shrink: 0; height: 260px; }
 .numpad {
@@ -300,6 +324,41 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
 .ticket-pre  { font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.55; white-space: pre; background: #FAFAFA; border: 1px dashed #CCC; border-radius: 6px; padding: 10px 8px; margin-bottom: 10px; overflow-x: auto; color: #212121; }
 .ticket-btns { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 8px; }
 .btn-ok-tk   { width: 100%; height: 46px; background: #1565C0; color: #FFF; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
+
+/* ══════════ BARRA JBET VALOR ══════════ */
+.jbet-val-bar {
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: stretch; align-items: stretch;
+  background: #c8c8c8; border-bottom: 1px solid #aaa;
+  -webkit-flex-shrink: 0; flex-shrink: 0;
+  height: 70px;
+}
+.jvb-box {
+  display: -webkit-flex; display: flex;
+  -webkit-flex-direction: column; flex-direction: column;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  padding: 4px 8px; min-width: 70px;
+}
+.jvb-lbl { font-size: 10px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: .4px; }
+.jvb-num { font-size: 22px; font-weight: 700; color: #1a1a1a; line-height: 1.15; }
+.jvb-sep { width: 1px; background: #aaa; margin: 8px 0; -webkit-align-self: stretch; align-self: stretch; }
+.jvb-ou  { font-size: 11px; color: #666; font-weight: 600; padding: 0 4px; -webkit-align-self: center; align-self: center; }
+.jvb-total { background: #3a3a3a; -webkit-flex: 1; flex: 1; }
+.jvb-total .jvb-lbl { color: #aaa; }
+.jvb-total .jvb-num { color: #A5D6A7; font-size: 24px; }
+.jvb-ok {
+  width: 62px; background: #1976D2; border: none; color: #FFF;
+  font-size: 30px; cursor: pointer; -webkit-flex-shrink: 0; flex-shrink: 0;
+  border-radius: 0;
+}
+.jvb-ok:active { background: #1565C0; }
+.jbet-formula-v {
+  background: #E8F5E9; color: #2E7D32;
+  text-align: center; font-size: 13px; font-weight: 700;
+  padding: 6px 8px; -webkit-flex-shrink: 0; flex-shrink: 0;
+  letter-spacing: .3px; border-bottom: 1px solid #C8E6C9;
+}
 </style>
 </head>
 <body>
@@ -391,12 +450,24 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
     <span id="n-title">Dezena</span>
     <span class="g-cnt" id="n-cnt">0</span>
   </div>
-  <!-- Palpites confirmados -->
-  <div class="n-lista-wrap" id="n-lista-wrap">
-    <span style="color:#AAA;font-size:13px;width:100%;text-align:center;-webkit-align-self:center;align-self:center">Nenhum número adicionado</span>
+  <!-- Área JBet: números como texto grande -->
+  <div class="n-lista-wrap" id="n-lista-wrap" style="color:#AAA;font-size:15px;letter-spacing:2px">Nenhum número adicionado</div>
+  <!-- Barra JBet: Prêmio / palpites / apagar -->
+  <div class="jbet-info">
+    <div class="jbi-box">
+      <span class="jbi-lbl">Prêmio</span>
+      <span class="jbi-val" id="jbi-premio">–</span>
+    </div>
+    <div class="jbi-sep">|</div>
+    <div class="jbi-box" style="-webkit-flex:1;flex:1">
+      <span class="jbi-lbl">Palpites</span>
+      <span class="jbi-val" id="jbi-count">0</span>
+    </div>
+    <button class="jbi-del" onclick="nDel()">⌫</button>
   </div>
-  <div id="n-hint" style="display:none;text-align:center;font-size:13px;font-weight:600;padding:2px 0"></div>
-  <div class="n-instr" id="n-ex">Digite os dígitos — confirma automaticamente</div>
+  <!-- Dígitos em digitação -->
+  <div id="n-hint" style="display:none;text-align:center;font-size:12px;font-weight:600;padding:2px;background:#FFF9C4;color:#F57F17"></div>
+  <div class="n-instr" id="n-ex" style="background:#f5f5f5;color:#888">Digite os dígitos — confirma automaticamente</div>
   <div class="n-disp"  id="n-disp">____</div>
   <div class="teclado-row">
     <div class="numpad">
@@ -406,7 +477,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
       <button class="k empty"></button><button class="k" onclick="nAdd('0')">0</button><button class="k empty"></button>
     </div>
     <div class="ks">
-      <button class="k-del" onclick="nDel()">⌫</button>
+      <button class="k-del" style="opacity:.4;pointer-events:none">⌫</button>
       <button class="k-ok dim" id="btn-ok-n" onclick="nOk()">✓</button>
     </div>
   </div>
@@ -419,12 +490,36 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
     <span id="v-title">Valor</span>
     <span></span>
   </div>
-  <div class="v-mm"   id="v-mm">Mínimo: R$ 0,01</div>
-  <div class="v-disp" id="v-disp">R$ 0</div>
-  <div class="modo-row">
-    <button class="btn-modo m-on"  id="m-div" onclick="setModo('d')">Dividir<br><span id="v-dt">R$ 0,00</span><br>✔ Selecionado</button>
-    <button class="btn-modo m-off" id="m-mul" onclick="setModo('m')">Multiplicar<br><span id="v-mt">R$ 0,00</span><br>Selecionar</button>
+  <div class="v-mm" id="v-mm">Máx/nº: R$ –</div>
+
+  <!-- ── Barra JBet: Prêmio | Valor digitado | Ou | Total | ✓ ── -->
+  <div class="jbet-val-bar">
+    <div class="jvb-box">
+      <span class="jvb-lbl">Prêmio</span>
+      <span class="jvb-num" id="jvb-premio">–</span>
+    </div>
+    <div class="jvb-sep"></div>
+    <div class="jvb-box" style="-webkit-flex:1;flex:1">
+      <span class="jvb-lbl">Valor</span>
+      <span class="jvb-num" id="jvb-valor">0</span>
+    </div>
+    <div class="jvb-ou">Ou</div>
+    <div class="jvb-box jvb-total" style="-webkit-flex:1;flex:1">
+      <span class="jvb-lbl">Total</span>
+      <span class="jvb-num" id="jvb-total">0,00</span>
+    </div>
+    <button class="jvb-ok" onclick="vOk()">✓</button>
   </div>
+
+  <!-- Fórmula viva: X a YP x R$V = R$T -->
+  <div class="jbet-formula-v" id="jvb-formula">–</div>
+
+  <!-- Modo dividir/multiplicar compacto -->
+  <div class="modo-row" style="height:52px">
+    <button class="btn-modo m-on"  id="m-div" onclick="setModo('d')">÷ Dividir<br><span id="v-dt" style="font-size:10px">–</span></button>
+    <button class="btn-modo m-off" id="m-mul" onclick="setModo('m')">× Multiplicar<br><span id="v-mt" style="font-size:10px">–</span></button>
+  </div>
+
   <div class="teclado-row">
     <div class="numpad">
       <button class="k" onclick="vAdd('1')">1</button><button class="k" onclick="vAdd('2')">2</button><button class="k" onclick="vAdd('3')">3</button>
@@ -815,9 +910,17 @@ function setupNum() {
   var q   = st.mod ? st.mod.q   : 2;
   var min = st.mod ? (st.mod.min || 1) : 1;
   document.getElementById('n-title').textContent = modLabel(st.mod || 'Números');
-  var instr = 'Digite ' + q + ' dígito(s) — confirma automaticamente';
-  if (min > 1) instr += ' | Mínimo: ' + min + ' palpites';
+  var instr = 'Digite ' + q + ' dígito(s)';
+  if (min > 1) instr += ' — mín. ' + min + ' palpites';
   document.getElementById('n-ex').textContent = instr;
+  // Inicializa Prêmio na barra JBet
+  var premioEl = document.getElementById('jbi-premio');
+  if (premioEl) {
+    var mult = (st.mod && st.mod.multiplier) ? Number(st.mod.multiplier) : null;
+    premioEl.textContent = mult ? mult + 'x' : '–';
+  }
+  var countEl = document.getElementById('jbi-count');
+  if (countEl) countEl.textContent = '0';
   updN();
   updNList();
 }
@@ -865,35 +968,34 @@ function updN() {
 function updNList() {
   var wrap = document.getElementById('n-lista-wrap');
   document.getElementById('n-cnt').textContent = st.nList.length;
-  wrap.innerHTML = '';
 
+  // ── Exibe como texto grande (estilo JBet) ──
   if (!st.nList.length) {
-    wrap.innerHTML = '<span style="color:#AAA;font-size:13px;width:100%;text-align:center;-webkit-align-self:center;align-self:center">Nenhum número adicionado</span>';
+    wrap.style.color = '#AAA'; wrap.style.fontSize = '15px'; wrap.style.letterSpacing = '2px';
+    wrap.textContent = 'Nenhum número adicionado';
   } else {
-    st.nList.forEach(function(n) {
-      var chip = document.createElement('span');
-      chip.className = 'n-chip';
-      chip.textContent = n;
-      wrap.appendChild(chip);
-    });
-    // botão para apagar o último palpite
-    var del = document.createElement('button');
-    del.className = 'n-chip n-chip-del';
-    del.textContent = '⌫ último';
-    del.onclick = function() { st.nList.pop(); updNList(); };
-    wrap.appendChild(del);
+    wrap.style.color = '#1565C0'; wrap.style.fontSize = '22px'; wrap.style.letterSpacing = '4px';
+    wrap.textContent = st.nList.join('  ');
   }
+
+  // ── Barra JBet: Prêmio / contagem ──
+  var premioEl = document.getElementById('jbi-premio');
+  var countEl  = document.getElementById('jbi-count');
+  if (premioEl) {
+    var mult = (st.mod && st.mod.multiplier) ? Number(st.mod.multiplier) : null;
+    premioEl.textContent = mult ? mult + 'x' : '–';
+  }
+  if (countEl) countEl.textContent = st.nList.length;
 
   var min   = (st.mod && st.mod.min) || 1;
   var okBtn = document.getElementById('btn-ok-n');
   if (st.nList.length >= min) okBtn.classList.remove('dim');
   else okBtn.classList.add('dim');
-  // Hint de mínimo exigido
+
   var hintEl = document.getElementById('n-hint');
   if (hintEl) {
     if (min > 1) {
-      hintEl.textContent = st.nList.length + '/' + min + ' palpites adicionados';
-      hintEl.style.color = st.nList.length >= min ? '#66BB6A' : '#FFA726';
+      hintEl.textContent = st.nList.length + '/' + min + ' palpites';
       hintEl.style.display = '';
     } else {
       hintEl.style.display = 'none';
@@ -921,6 +1023,14 @@ function setupVal() {
   document.getElementById('v-title').textContent = modLabel(st.mod || 'Valor');
   var mx = (st.draw && st.draw.max_value_per_number) || 500;
   document.getElementById('v-mm').textContent = 'Máx/nº: R$ ' + Number(mx).toFixed(2);
+  // Prêmio inicial na barra JBet
+  var jvbPremio = document.getElementById('jvb-premio');
+  if (jvbPremio) {
+    var mult = (st.mod && st.mod.multiplier) ? Number(st.mod.multiplier) : null;
+    jvbPremio.textContent = mult ? mult + 'x' : '–';
+  }
+  var jvbFormula = document.getElementById('jvb-formula');
+  if (jvbFormula) jvbFormula.textContent = '–';
   updV(); updModo();
 }
 function goBackVal() { if (st.mod && st.mod.g) go('s-grupo'); else go('s-num'); }
@@ -929,25 +1039,51 @@ function vCom()  { if (st.val.indexOf(',') < 0) { st.val = (st.val || '0') + ','
 function vClr()  { st.val = ''; updV(); }
 function vDel()  { if (st.val.length) { st.val = st.val.slice(0,-1); updV(); } }
 function updV() {
-  document.getElementById('v-disp').textContent = 'R$ ' + (st.val || '0');
   var v    = parseFloat((st.val || '0').replace(',','.')) || 0;
   var cm   = (st.mod && st.mod.charge_multiplier) ? Number(st.mod.charge_multiplier) : 1;
   var min  = (st.mod && st.mod.min) ? st.mod.min : 1;
-  // Para DUQUE/TERNO (min>1), a entrada é UM bet com múltiplos números — count=1
-  // Para múltiplos palpites normais, count = quantidade de números
+  var mult = (st.mod && st.mod.multiplier)        ? Number(st.mod.multiplier) : null;
   var count = (min > 1) ? 1 : ((st.entrada ? st.entrada.split(',').length : 1) || 1);
 
-  var perNum_div = v / count;          // Dividir: total ÷ qtd
-  var total_mul  = v * count;          // Multiplicar: valor × qtd
+  var perNum_div = v > 0 ? v / count : 0;
+  var total_mul  = v * count;
+  var custo_div  = perNum_div * cm;
+  var custo_mul  = total_mul  * cm;
 
-  var custo_div  = perNum_div * cm;    // Custo real por número em modo Dividir
-  var custo_mul  = total_mul  * cm;    // Custo real total em modo Multiplicar
+  // ── Barra JBet ──
+  var jvbPremio  = document.getElementById('jvb-premio');
+  var jvbValor   = document.getElementById('jvb-valor');
+  var jvbTotal   = document.getElementById('jvb-total');
+  var jvbFormula = document.getElementById('jvb-formula');
+  if (jvbPremio) jvbPremio.textContent = mult ? mult + 'x' : '–';
+  if (jvbValor)  jvbValor.textContent  = (st.val || '0');
+
+  var totalDisplay = st.modo === 'd'
+    ? (perNum_div * cm).toFixed(2).replace('.',',')
+    : custo_mul.toFixed(2).replace('.',',');
+  if (jvbTotal)  jvbTotal.textContent  = totalDisplay;
+
+  // Fórmula: "1 a 10P x 1,00 = 40,00"
+  if (jvbFormula) {
+    var cmLabel = (cm <= 1) ? '1P' : '1/' + cm + 'P';
+    var valFmt  = v.toFixed(2).replace('.',',');
+    var totFmt  = totalDisplay;
+    if (count > 1 && st.modo === 'm') {
+      jvbFormula.textContent = '1 a ' + count + 'P × R$ ' + valFmt + ' = R$ ' + totFmt;
+    } else {
+      jvbFormula.textContent = cmLabel + ' × R$ ' + valFmt + ' = R$ ' + totFmt;
+    }
+  }
+
+  // v-disp (escondido mas mantido para compat)
+  var vd = document.getElementById('v-disp');
+  if (vd) vd.textContent = 'R$ ' + (st.val || '0');
 
   var dtTxt = 'R$ ' + perNum_div.toFixed(2).replace('.',',') + '/nº';
   var mtTxt = 'R$ ' + total_mul .toFixed(2).replace('.',',') + ' total';
   if (cm > 1) {
-    dtTxt += ' (custo real: R$ ' + custo_div.toFixed(2).replace('.',',') + ' ×' + count + ')';
-    mtTxt += ' (custo real: R$ ' + custo_mul.toFixed(2).replace('.',',') + ')';
+    dtTxt += ' (×' + cm + ' sort.)';
+    mtTxt += ' (real: R$ ' + custo_mul.toFixed(2).replace('.',',') + ')';
   }
   document.getElementById('v-dt').textContent = dtTxt;
   document.getElementById('v-mt').textContent = mtTxt;

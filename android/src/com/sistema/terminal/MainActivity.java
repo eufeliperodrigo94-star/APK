@@ -271,10 +271,27 @@ public class MainActivity extends Activity {
                     @Override public void onComplete() { latch.countDown(); }
                 });
 
-                // Feed + corte via sendRAWData
-                xchengService.printWrapPaper(4, noopCallback("feed"));
+                // latch.await(5, TimeUnit.SECONDS);
 
-                latch.await(5, TimeUnit.SECONDS);
+                // Barcode Code128B (NSU)
+                if (ok[0]) {
+                    String nsu = extractNsu(text);
+                    if (nsu != null && !nsu.isEmpty()) {
+                        try {
+                            final CountDownLatch bLatch = new CountDownLatch(1);
+                            xchengService.printBarCode(nsu, 1, 2, 80, false,
+                                new IPrinterCallback.Stub() {
+                                    @Override public void onException(int c, String m) { bLatch.countDown(); }
+                                    @Override public void onLength(long c, long t) {}
+                                    @Override public void onRealLength(double c, double t) {}
+                                    @Override public void onComplete() { bLatch.countDown(); }
+                                });
+                            bLatch.await(3, TimeUnit.SECONDS);
+                        } catch (Exception ignored) {}
+                    }
+                }
+
+                xchengService.printWrapPaper(4, noopCallback("feed"));
 
                 if (ok[0]) {
                     return "{\"ok\":true,\"driver\":\"xcheng-aidl-text\"}";
@@ -335,21 +352,27 @@ public class MainActivity extends Activity {
 
         // ── ESC/POS bytes ─────────────────────────────────────────────────
         private byte[] buildEscPosBytes(String text) throws Exception {
-            byte[] init  = {0x1B, 0x40};           // ESC @ init
-            byte[] enc   = {0x1B, 0x74, 0x10};     // ESC t 16 ISO-8859-1
-            byte[] textB = text.getBytes("ISO-8859-1");
-            byte[] feed  = {0x0A,0x0A,0x0A,0x0A,0x0A};
-            byte[] cut   = {0x1D, 0x56, 0x41, 0x00};
+            java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+            bos.write(new byte[]{0x1B, 0x40});           // ESC @ init
+            bos.write(new byte[]{0x1B, 0x74, 0x10});     // ESC t 16 ISO-8859-1
+            bos.write(text.getBytes("ISO-8859-1"));
 
-            int len = init.length + enc.length + textB.length + feed.length + cut.length;
-            byte[] out = new byte[len];
-            int p = 0;
-            System.arraycopy(init,  0, out, p, init.length);  p += init.length;
-            System.arraycopy(enc,   0, out, p, enc.length);   p += enc.length;
-            System.arraycopy(textB, 0, out, p, textB.length); p += textB.length;
-            System.arraycopy(feed,  0, out, p, feed.length);  p += feed.length;
-            System.arraycopy(cut,   0, out, p, cut.length);
-            return out;
+            // ── Código de barras Code128B do NSU ──────────────────────────
+            String nsu = extractNsu(text);
+            if (nsu != null && !nsu.isEmpty()) {
+                byte[] nsuB = nsu.getBytes("US-ASCII");
+                bos.write(new byte[]{0x1D, 0x68, 0x50});           // GS h 80 (altura)
+                bos.write(new byte[]{0x1D, 0x77, 0x02});           // GS w 2 (largura)
+                bos.write(new byte[]{0x1D, 0x48, 0x02});           // GS H 2 (texto abaixo)
+                // GS k 73 n {B data  (Code128, n=len+2 pelo {B)
+                bos.write(new byte[]{0x1D, 0x6B, 0x49, (byte)(nsuB.length + 2)});
+                bos.write(new byte[]{0x7B, 0x42});                  // {B = Code128B
+                bos.write(nsuB);
+            }
+
+            bos.write(new byte[]{0x0A, 0x0A, 0x0A, 0x0A, 0x0A}); // feed
+            bos.write(new byte[]{0x1D, 0x56, 0x41, 0x00});        // corte
+            return bos.toByteArray();
         }
 
         // ── CloudPOS ─────────────────────────────────────────────────────
@@ -403,6 +426,13 @@ public class MainActivity extends Activity {
                     cbJS("{\"ok\":false,\"error\":\"Use ESC/POS ou AIDL\"}");
                 }
             });
+        }
+
+        // ── Extrai NSU do texto do bilhete ─────────────────────────────────
+        private String extractNsu(String text) {
+            java.util.regex.Matcher m =
+                java.util.regex.Pattern.compile("NSU:\\s*(\\S+)").matcher(text);
+            return m.find() ? m.group(1).trim() : null;
         }
 
         private IPrinterCallback noopCallback(final String label) {

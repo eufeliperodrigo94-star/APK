@@ -1083,13 +1083,14 @@ function updV() {
   var mult  = (st.mod && st.mod.multiplier) ? Number(st.mod.multiplier) : null;
   var count = (min > 1) ? 1 : ((st.entrada ? st.entrada.split(',').length : 1) || 1);
 
-  // ── Cálculos corretos ─────────────────────────────────────────────────────
-  // Dividir  : v = total nominal → por palpite = v/count
-  //            real API = (v/count) × count × cm = v × cm
-  // Multiplicar: v = por palpite → real = v × count × cm
-  var perNum  = count > 0 ? v / count : 0;
-  var realDiv = v * cm;
-  var realMul = v * count * cm;
+  // ── Fórmula: TOTAL = N × P × M × VALOR × F ──────────────────────────────
+  // Dividir  : usuário entra com TOTAL → VALOR = TOTAL ÷ (N × P)
+  //            TOTAL exibido = v (o que o usuário quer pagar no total)
+  //            amount enviado à API = v ÷ count ÷ cm (API multiplica por cm)
+  // Multiplicar: usuário entra por palpite → TOTAL = v × count × cm
+  var unitDiv = (count > 0 && cm > 0) ? v / count / cm : 0; // valor por nº por prêmio
+  var totalDiv = v;                                           // total dividir = o que entrou
+  var totalMul = v * count * cm;                             // total multiplicar
 
   var jvbPremio  = document.getElementById('jvb-premio');
   var jvbValor   = document.getElementById('jvb-valor');
@@ -1099,27 +1100,26 @@ function updV() {
   if (jvbPremio) jvbPremio.textContent = mult ? mult + 'x' : '–';
   if (jvbValor)  jvbValor.textContent  = (st.val || '0');
 
-  var totalReal = st.modo === 'd' ? realDiv : realMul;
+  var totalReal = st.modo === 'd' ? totalDiv : totalMul;
   var totalFmt  = totalReal.toFixed(2).replace('.',',');
   if (jvbTotal) jvbTotal.textContent = totalFmt;
 
   // ── Fórmula legível ───────────────────────────────────────────────────────
   if (jvbFormula) {
-    var vFmt   = v.toFixed(2).replace('.',',');
-    var perFmt = perNum.toFixed(2).replace('.',',');
+    var vFmt    = v.toFixed(2).replace('.',',');
+    var unitFmt = unitDiv.toFixed(2).replace('.',',');
     var f = '';
     if (st.modo === 'd') {
-      // Ex: "R$1,00 ÷ 4nº = R$0,25/nº × 5 sort. = R$5,00"
-      f = count > 1
-        ? 'R$ ' + vFmt + ' ÷ ' + count + ' nº = R$ ' + perFmt + '/nº'
-        : 'R$ ' + vFmt;
-      if (cm > 1) f += ' × ' + cm + ' sort. = R$ ' + totalFmt;
-      else        f += ' = R$ ' + totalFmt;
+      // Ex: "R$32,00 ÷ 10nº ÷ 10P = R$0,32/nº/P"
+      f = 'R$ ' + vFmt;
+      if (count > 1) f += ' ÷ ' + count + 'nº';
+      if (cm > 1)    f += ' ÷ ' + cm + 'P';
+      f += ' = R$ ' + unitFmt + '/un';
     } else {
-      // Ex: "4P × R$1,00 × 5 sort. = R$20,00"
-      f = count > 1 ? count + 'P × R$ ' + vFmt : 'R$ ' + vFmt;
-      if (cm > 1) f += ' × ' + cm + ' sort. = R$ ' + totalFmt;
-      else        f += ' = R$ ' + totalFmt;
+      // Ex: "10nº × R$1,00 × 10P = R$100,00"
+      f = count > 1 ? count + 'nº × R$ ' + vFmt : 'R$ ' + vFmt;
+      if (cm > 1) f += ' × ' + cm + 'P';
+      f += ' = R$ ' + totalFmt;
     }
     jvbFormula.textContent = f;
   }
@@ -1129,12 +1129,11 @@ function updV() {
   if (vd) vd.textContent = 'R$ ' + (st.val || '0');
 
   // Labels nos botões Dividir/Multiplicar
-  var perFmt2 = perNum.toFixed(2).replace('.',',');
-  var dtTxt = count > 1
-    ? 'R$ ' + perFmt2 + '/nº' + (cm > 1 ? ' (×' + cm + ' sort.)' : '')
-    : 'R$ ' + (v.toFixed(2).replace('.',',')) + (cm > 1 ? ' (×' + cm + ' sort.)' : '');
-  var mtTxt = 'R$ ' + (v * count).toFixed(2).replace('.',',') + ' total';
-  if (cm > 1) mtTxt += ' (real: R$ ' + realMul.toFixed(2).replace('.',',') + ')';
+  var unitFmt2 = unitDiv.toFixed(2).replace('.',',');
+  var dtTxt = 'Total: R$ ' + totalDiv.toFixed(2).replace('.',',');
+  if (count > 1 || cm > 1) dtTxt += ' (' + (count > 1 ? count + 'nº' : '') + (cm > 1 ? (count > 1 ? ' × ' : '') + cm + 'P' : '') + ')';
+  var mtTxt = 'Total: R$ ' + totalMul.toFixed(2).replace('.',',');
+  if (count > 1 || cm > 1) mtTxt += ' (' + (count > 1 ? count + 'nº' : '') + (cm > 1 ? (count > 1 ? ' × ' : '') + cm + 'P' : '') + ')';
   document.getElementById('v-dt').textContent = dtTxt;
   document.getElementById('v-mt').textContent = mtTxt;
 }
@@ -1189,17 +1188,17 @@ function novoJogo() {
 
 // ─── Resumo ──────────────────────────────────────────────────────────────────
 function totalAposta(a) {
+  // Dividir: a.valor já É o total que o usuário quer pagar
+  // Multiplicar: a.valor é por palpite → total = v × count × cm
   var min   = (a.mod && a.mod.min) || 1;
   var count = (min > 1) ? 1 : (a.entrada ? a.entrada.split(',').length : 1);
-  return a.modo === 'm' ? (a.valor * count) : a.valor;
+  var cm    = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
+  return a.modo === 'm' ? (a.valor * count * cm) : a.valor;
 }
 
 function totalCustoReal(apostas) {
   var total = 0;
-  apostas.forEach(function(a) {
-    var cm = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
-    total += totalAposta(a) * cm;
-  });
+  apostas.forEach(function(a) { total += totalAposta(a); });
   return total;
 }
 
@@ -1331,11 +1330,14 @@ function finBilhete() {
       // Normal: cada número → bet separado
       var nums  = a.entrada ? a.entrada.split(',') : [''];
       var count = nums.length;
+      // Dividir: usuário entrou com TOTAL → amount por bet = TOTAL ÷ N ÷ cm
+      // (a API multiplica por cm → resultado = TOTAL/N × N = TOTAL ✓)
+      // Multiplicar: usuário entrou por palpite → amount = v direto
       var amtPer = a.modo === 'd'
-        ? Math.floor((a.valor / count) * 100) / 100
+        ? Math.floor((a.valor / count / cm) * 10000) / 10000
         : a.valor;
       var resto  = a.modo === 'd'
-        ? Math.round((a.valor - amtPer * count) * 100) / 100
+        ? parseFloat((a.valor / cm - amtPer * count).toFixed(4))
         : 0;
       nums.forEach(function(num, idx) {
         var amt = amtPer + (idx === nums.length - 1 ? resto : 0);
@@ -1652,9 +1654,12 @@ function formatarComprovante(tid, total, apostas, res) {
       var min = (a.mod && a.mod.min) || 1;
       var cnt = (min > 1) ? 1 : (a.entrada ? a.entrada.split(',').length : 1);
       var v   = Number(a.valor);
-      var tot = a.modo === 'd' ? (v * cm) : (v * cnt * cm);
+      // total exibido:
+      //   dividir     → v (é o total que o usuário quer pagar)
+      //   multiplicar → v × cnt × cm
+      var tot = a.modo === 'd' ? v : (v * cnt * cm);
       if (!mergedMap[bt]) {
-        mergedMap[bt] = { plabel: prizeLabel(a), valor: 0, totBet: 0 };
+        mergedMap[bt] = { plabel: prizeLabel(a), valor: 0, totBet: 0, _cm: cm, _count: cnt };
         mergedOrder.push(bt);
       }
       mergedMap[bt].valor  += v;
@@ -1662,8 +1667,14 @@ function formatarComprovante(tid, total, apostas, res) {
     });
 
     mergedOrder.forEach(function(bt) {
-      var m = mergedMap[bt];
-      t += m.plabel + ' -> ' + brNum(m.valor) + ' = ' + brNum(m.totBet) + '\n';
+      var m   = mergedMap[bt];
+      var cm2 = mergedMap[bt]._cm || 1;
+      var cnt = mergedMap[bt]._count || 1;
+      // cmLabel: "1 a 10P" em vez de "1/10P"
+      var cmLbl = cm2 > 1 ? '1 a ' + cm2 + 'P' : '1P';
+      // Unidade = total ÷ (N × P) para exibição
+      var unit = (cnt > 0 && cm2 > 0) ? m.valor / cnt / cm2 : m.valor;
+      t += cmLbl + ' x ' + brNum(unit) + ' = ' + brNum(m.valor) + '\n';
     });
 
     t += SEP + '\n';

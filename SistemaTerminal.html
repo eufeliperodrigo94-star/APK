@@ -1230,13 +1230,8 @@ function totalCustoReal(apostas) {
 }
 
 function buildRsm() {
-  // ── Calcula totais ──────────────────────────────────────────────────────
-  var totReal = 0;
-  st.apostas.forEach(function(a) {
-    var cm  = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
-    var cnt = (a.mod && a.mod.min > 1) ? 1 : ((a.entrada ? a.entrada.split(',').length : 1) || 1);
-    totReal += a.modo === 'd' ? (a.valor * cm) : (a.valor * cnt * cm);
-  });
+  // ── Calcula totais via totalCustoReal (evita duplicação de lógica) ──────
+  var totReal = totalCustoReal(st.apostas);
 
   // ── Cabeçalho resumo ───────────────────────────────────────────────────
   document.getElementById('rsm-tot').textContent = 'R$ ' + totReal.toFixed(2).replace('.',',');
@@ -1588,7 +1583,12 @@ function formatarComprovante(tid, total, apostas, res) {
     return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+
            pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
   }
-  function brNum(n) { return Number(n).toFixed(2).replace('.', ','); }
+  function brNum(n) {
+    var v = Number(n);
+    // Usa 4 casas decimais para valores pequenos (< 0,01) evitando "0,00"
+    var dec = (Math.abs(v) > 0 && Math.abs(v) < 0.01) ? 4 : 2;
+    return v.toFixed(dec).replace('.', ',');
+  }
 
   // Quebra lista de números em linhas de até W chars
   function wrapNums(entrada) {
@@ -1684,12 +1684,12 @@ function formatarComprovante(tid, total, apostas, res) {
       var cnt = (min > 1) ? 1 : (a.entrada ? a.entrada.split(',').length : 1);
       var f   = (a.mod && a.mod.factor) ? Number(a.mod.factor) : 1;
       var v   = Number(a.valor);
-      // total exibido:
+      // total real:
       //   dividir     → v (é o total que o usuário quer pagar)
       //   multiplicar → v × cnt × cm
       var tot = a.modo === 'd' ? v : (v * cnt * cm);
       if (!mergedMap[bt]) {
-        mergedMap[bt] = { plabel: prizeLabel(a), valor: 0, totBet: 0, _cm: cm, _count: cnt, _factor: f };
+        mergedMap[bt] = { plabel: prizeLabel(a), valor: 0, totBet: 0, _cm: cm, _count: cnt, _factor: f, _modo: a.modo };
         mergedOrder.push(bt);
       }
       mergedMap[bt].valor  += v;
@@ -1698,14 +1698,23 @@ function formatarComprovante(tid, total, apostas, res) {
 
     mergedOrder.forEach(function(bt) {
       var m   = mergedMap[bt];
-      var cm2 = mergedMap[bt]._cm || 1;
-      var cnt = mergedMap[bt]._count || 1;
-      var fac = mergedMap[bt]._factor || 1;
+      var cm2  = mergedMap[bt]._cm || 1;
+      var cnt  = mergedMap[bt]._count || 1;
+      var fac  = mergedMap[bt]._factor || 1;
+      var modo2 = mergedMap[bt]._modo || 'd';
       // cmLabel: "1 a 10P" em vez de "1/10P"
       var cmLbl = cm2 > 1 ? '1 a ' + cm2 + 'P' : '1P';
-      // Unidade = total ÷ (N × P × F) — F>1 ex: milhar e centena
-      var unit = (cnt > 0 && cm2 > 0 && fac > 0) ? m.valor / cnt / cm2 / fac : m.valor;
-      t += cmLbl + ' x ' + brNum(unit) + ' = ' + brNum(m.valor) + '\n';
+      // Multiplicar: unit = valor/palpite (a.valor), total = valor × N × cm
+      // Dividir:     unit = total ÷ (N × P × F), total = valor digitado
+      var unit, totalDisp;
+      if (modo2 === 'm') {
+        unit      = cnt > 0 ? m.valor / cnt : m.valor; // m.valor = soma de a.valor (por palpite) → por nº
+        totalDisp = m.totBet;
+      } else {
+        unit      = (cnt > 0 && cm2 > 0 && fac > 0) ? m.valor / cnt / cm2 / fac : m.valor;
+        totalDisp = m.valor;
+      }
+      t += cmLbl + ' x ' + brNum(unit) + ' = ' + brNum(totalDisp) + '\n';
     });
 
     t += SEP + '\n';

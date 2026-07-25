@@ -7,10 +7,10 @@
 <style>
 /* ── Reset ── */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Segoe UI', Arial, sans-serif; }
-html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #1B4332; }
 
 /* ── Telas ── */
-.sc { display: none; -webkit-flex-direction: column; flex-direction: column; width: 100%; height: 100%; overflow: hidden; }
+.sc { display: none; -webkit-flex-direction: column; flex-direction: column; width: 100%; height: 100%; overflow: hidden; background: #F4F7F4; }
 .sc.on { display: -webkit-flex; display: flex; }
 
 /* ── Scroll helper ── */
@@ -18,27 +18,27 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
 
 /* ══════════ HEADERS ══════════ */
 .hdr-blue {
-  background: #1565C0; color: #FFF;
+  background: #1B4332; color: #FFF;
   padding: 10px 12px;
   display: -webkit-flex; display: flex;
   -webkit-align-items: center; align-items: center;
   min-height: 72px; -webkit-flex-shrink: 0; flex-shrink: 0;
 }
 .hdr-blue .logo {
-  width: 64px; height: 50px; background: #FFF; border-radius: 4px;
+  width: 64px; height: 50px; background: #D4A017; border-radius: 4px;
   display: -webkit-flex; display: flex;
   -webkit-align-items: center; align-items: center;
   -webkit-justify-content: center; justify-content: center;
-  font-size: 9px; font-weight: 900; color: #1565C0;
+  font-size: 9px; font-weight: 900; color: #1B4332;
   text-align: center; line-height: 1.3; padding: 4px;
   -webkit-flex-shrink: 0; flex-shrink: 0; margin-right: 12px;
 }
 .hdr-blue .info { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; }
 .hdr-blue .info .name { font-size: 14px; font-weight: 700; }
-.hdr-blue .info span  { font-size: 12px; color: #90CAF9; margin-top: 2px; }
+.hdr-blue .info span  { font-size: 12px; color: #A5D6A7; margin-top: 2px; }
 
 .hdr-green {
-  background: #4CAF50; color: #FFF;
+  background: #1B4332; color: #FFF;
   height: 50px; padding: 0 14px;
   display: -webkit-flex; display: flex;
   -webkit-align-items: center; align-items: center;
@@ -46,10 +46,10 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
   font-size: 17px; font-weight: 700;
   -webkit-flex-shrink: 0; flex-shrink: 0;
 }
-.hdr-green .back { background: none; border: none; color: #FFF; font-size: 26px; cursor: pointer; padding: 0 8px 0 0; }
+.hdr-green .back { background: none; border: none; color: #D4A017; font-size: 26px; cursor: pointer; padding: 0 8px 0 0; }
 
 .hdr-date {
-  background: #1565C0; color: #FFF;
+  background: #1B4332; color: #D4A017;
   height: 54px;
   display: -webkit-flex; display: flex;
   -webkit-align-items: center; align-items: center;
@@ -58,9 +58,9 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
   -webkit-flex-shrink: 0; flex-shrink: 0;
 }
 
-.hdr-resumo { background: #1565C0; padding: 12px; text-align: center; -webkit-flex-shrink: 0; flex-shrink: 0; }
-.hdr-resumo .lbl { font-size: 13px; color: #90CAF9; }
-.hdr-resumo .val { font-size: 30px; font-weight: 700; color: #A5D6A7; }
+.hdr-resumo { background: #1B4332; padding: 12px; text-align: center; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.hdr-resumo .lbl { font-size: 13px; color: #A5D6A7; }
+.hdr-resumo .val { font-size: 30px; font-weight: 700; color: #D4A017; }
 
 /* ══════════ LOGIN ══════════ */
 .login-body {
@@ -69,63 +69,63 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
   -webkit-flex-direction: column; flex-direction: column;
   -webkit-align-items: center; align-items: center;
   -webkit-justify-content: center; justify-content: center;
-  padding: 32px 24px; background: #F0F4F8;
+  padding: 32px 24px; background: #F4F7F4;
   overflow-y: auto; -webkit-overflow-scrolling: touch;
 }
 .login-logo {
-  width: 90px; height: 70px; background: #1565C0; border-radius: 8px;
+  width: 100px; height: 80px; background: #1B4332; border-radius: 10px;
   display: -webkit-flex; display: flex;
   -webkit-align-items: center; align-items: center;
   -webkit-justify-content: center; justify-content: center;
-  font-size: 11px; color: #FFF; font-weight: 900;
-  text-align: center; line-height: 1.4; margin-bottom: 24px;
+  font-size: 12px; color: #D4A017; font-weight: 900;
+  text-align: center; line-height: 1.4; margin-bottom: 28px;
+  border: 3px solid #D4A017;
 }
-.login-title { font-size: 20px; font-weight: 700; color: #1565C0; margin-bottom: 4px; }
-.login-sub   { font-size: 13px; color: #888; margin-bottom: 24px; }
+.login-title { font-size: 22px; font-weight: 700; color: #1B4332; margin-bottom: 4px; }
+.login-sub   { font-size: 13px; color: #888; margin-bottom: 28px; }
 .login-label { font-size: 13px; font-weight: 600; color: #444; margin-bottom: 5px; width: 100%; text-align: left; }
 .login-inp   {
-  width: 100%; height: 50px; border: 1.5px solid #CCC; border-radius: 8px;
+  width: 100%; height: 52px; border: 2px solid #C8E6C9; border-radius: 10px;
   padding: 0 14px; font-size: 16px; margin-bottom: 14px; outline: none; background: #FFF;
-  -webkit-appearance: none;
+  -webkit-appearance: none; color: #1B4332;
 }
-.login-inp:focus { border-color: #1565C0; }
+.login-inp:focus { border-color: #1B4332; }
 .btn-login {
-  width: 100%; height: 52px; background: #388E3C; color: #FFF;
-  border: none; border-radius: 8px; font-size: 17px; font-weight: 700; cursor: pointer;
-  margin-top: 8px;
+  width: 100%; height: 54px; background: #1B4332; color: #D4A017;
+  border: none; border-radius: 10px; font-size: 18px; font-weight: 700; cursor: pointer;
+  margin-top: 8px; letter-spacing: 1px;
 }
 .btn-login:active { background: #2E7D32; }
-.login-err { width: 100%; text-align: center; color: #E53935; font-size: 13px; min-height: 22px; margin-top: 10px; }
+.login-err { width: 100%; text-align: center; color: #C62828; font-size: 13px; min-height: 22px; margin-top: 10px; }
 
 /* ══════════ MAIN ══════════ */
 .btn-vender {
   display: block; margin: 12px; width: calc(100% - 24px);
-  height: 68px; background: #388E3C; color: #FFF;
-  border: none; border-radius: 8px; font-size: 22px; font-weight: 700; cursor: pointer;
-  -webkit-flex-shrink: 0; flex-shrink: 0;
+  height: 72px; background: #D4A017; color: #1B4332;
+  border: none; border-radius: 10px; font-size: 24px; font-weight: 900; cursor: pointer;
+  -webkit-flex-shrink: 0; flex-shrink: 0; letter-spacing: 1px;
+  box-shadow: 0 3px 8px rgba(0,0,0,.2);
 }
-.btn-vender:active { background: #2E7D32; }
+.btn-vender:active { background: #B8860B; }
 
 .menu-grid {
   display: -webkit-flex; display: flex;
   -webkit-flex-wrap: wrap; flex-wrap: wrap;
-  padding: 0 12px; -webkit-flex-shrink: 0; flex-shrink: 0;
+  padding: 0 8px; -webkit-flex-shrink: 0; flex-shrink: 0; gap: 8px;
 }
 .btn-mn {
-  width: 50%; height: 80px;
-  border: none; cursor: pointer;
-  font-size: 14px; font-weight: 700; color: #FFF;
+  width: calc(50% - 4px); height: 80px;
+  border: none; cursor: pointer; border-radius: 10px;
+  font-size: 13px; font-weight: 700; color: #FFF;
   display: -webkit-flex; display: flex;
   -webkit-flex-direction: column; flex-direction: column;
   -webkit-align-items: center; align-items: center;
   -webkit-justify-content: center; justify-content: center;
-  padding: 4px;
+  padding: 4px; box-shadow: 0 2px 4px rgba(0,0,0,.2);
 }
-/* simulate gap with border */
-.btn-mn { border: 4px solid #FFF; border-radius: 8px; }
 .btn-mn:active { opacity: .85; }
-.mn-ico { font-size: 24px; margin-bottom: 4px; }
-.sair { text-align: center; color: #1565C0; font-size: 17px; font-weight: 700; padding: 14px; cursor: pointer; text-decoration: underline; }
+.mn-ico { font-size: 26px; margin-bottom: 4px; }
+.sair { text-align: center; color: #1B4332; font-size: 16px; font-weight: 700; padding: 16px; cursor: pointer; text-decoration: underline; }
 .ver  { text-align: center; color: #999; font-size: 12px; padding-bottom: 10px; }
 
 /* ══════════ LISTAS ══════════ */
@@ -134,40 +134,41 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
   display: -webkit-flex; display: flex;
   -webkit-justify-content: space-between; justify-content: space-between;
   -webkit-align-items: center; align-items: center;
-  width: 100%; padding: 15px 14px; margin-bottom: 7px;
-  border: none; border-radius: 7px;
-  font-size: 16px; font-weight: 500; color: #FFF; cursor: pointer;
+  width: 100%; padding: 16px 14px; margin-bottom: 8px;
+  border: none; border-radius: 10px;
+  font-size: 16px; font-weight: 600; color: #FFF; cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,.15);
 }
-.btn-ext  { background: #42A5F5; }
-.btn-ext:active  { background: #1976D2; }
-.btn-tipo { background: #1E88E5; }
-.btn-tipo:active { background: #1565C0; }
+.btn-ext  { background: #2E7D32; }
+.btn-ext:active  { background: #1B4332; }
+.btn-tipo { background: #2D6A4F; }
+.btn-tipo:active { background: #1B4332; }
 .grp-lbl {
-  font-size: 11px; font-weight: 700; color: #1565C0;
+  font-size: 11px; font-weight: 700; color: #1B4332;
   padding: 8px 4px 4px; letter-spacing: .5px; text-transform: uppercase;
-  border-bottom: 1px solid #BBDEFB; margin-bottom: 6px;
+  border-bottom: 2px solid #C8E6C9; margin-bottom: 6px;
 }
 .msg-load { text-align: center; color: #888; padding: 24px; font-size: 14px; }
-.msg-err  { text-align: center; color: #E53935; padding: 20px; font-size: 14px; line-height: 1.6; }
+.msg-err  { text-align: center; color: #C62828; padding: 20px; font-size: 14px; line-height: 1.6; }
 
 /* ══════════ GRUPO ══════════ */
 .g-display {
-  background: #F5F5F5; height: 58px;
+  background: #1B4332; height: 58px;
   display: -webkit-flex; display: flex;
   -webkit-align-items: center; align-items: center;
   -webkit-justify-content: center; justify-content: center;
-  font-size: 22px; font-weight: 700; color: #212121;
-  letter-spacing: 8px; border-bottom: 1px solid #DDD;
+  font-size: 24px; font-weight: 700; color: #D4A017;
+  letter-spacing: 8px; border-bottom: 1px solid #2E7D32;
   -webkit-flex-shrink: 0; flex-shrink: 0;
 }
-.g-cnt { background: rgba(255,255,255,.22); border-radius: 12px; padding: 2px 10px; font-size: 14px; font-weight: 600; }
+.g-cnt { background: rgba(212,160,23,.2); border-radius: 12px; padding: 2px 10px; font-size: 14px; font-weight: 600; color: #D4A017; }
 .g-body { display: -webkit-flex; display: flex; -webkit-flex: 1; flex: 1; overflow: hidden; }
 
 .animais-wrap { -webkit-flex: 1; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .grid-an {
   display: -webkit-flex; display: flex;
   -webkit-flex-wrap: wrap; flex-wrap: wrap;
-  background: #BDBDBD; padding: 1px;
+  background: #DDD; padding: 1px;
 }
 .btn-an {
   width: 20%; background: #FFF; border: none; cursor: pointer;
@@ -177,116 +178,118 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
   -webkit-flex-direction: column; flex-direction: column;
   -webkit-align-items: center; align-items: center;
   -webkit-justify-content: center; justify-content: center;
-  border: 1px solid #BDBDBD;
+  border: 1px solid #DDD;
 }
-.btn-an:active, .btn-an.sel { background: #BBDEFB; }
+.btn-an:active, .btn-an.sel { background: #C8E6C9; }
 .an-em { font-size: 20px; line-height: 1; }
 .an-dz { font-size: 8px; color: #777; }
 .an-nm { font-size: 9px; font-weight: 700; color: #333; }
 
 /* ══════════ SIDEBAR ══════════ */
-.sidebar { width: 60px; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-flex-shrink: 0; flex-shrink: 0; }
-.s-del { -webkit-flex: 1; flex: 1; background: #F57C00; border: none; color: #FFF; font-size: 24px; cursor: pointer; }
-.s-lmp { -webkit-flex: 1; flex: 1; background: #1565C0; border: none; color: #FFF; font-size: 22px; cursor: pointer; }
-.s-ok  { -webkit-flex: 2; flex: 2; background: #388E3C; border: none; color: #FFF; font-size: 32px; cursor: pointer; }
+.sidebar { width: 62px; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.s-del { -webkit-flex: 1; flex: 1; background: #E53935; border: none; color: #FFF; font-size: 24px; cursor: pointer; }
+.s-lmp { -webkit-flex: 1; flex: 1; background: #546E7A; border: none; color: #FFF; font-size: 22px; cursor: pointer; }
+.s-ok  { -webkit-flex: 2; flex: 2; background: #D4A017; border: none; color: #1B4332; font-size: 32px; font-weight: 900; cursor: pointer; }
 .s-del:active, .s-lmp:active, .s-ok:active { opacity: .85; }
 
 /* ══════════ TECLADO NÚMEROS ══════════ */
-.n-instr { text-align: center; color: #888; font-size: 13px; padding: 6px 0; -webkit-flex-shrink: 0; flex-shrink: 0; }
-.n-disp  { text-align: center; font-size: 34px; font-weight: 700; color: #1565C0; padding: 6px; letter-spacing: 6px; -webkit-flex-shrink: 0; flex-shrink: 0; min-height: 52px; }
+.n-instr { text-align: center; color: #777; font-size: 13px; padding: 5px 0; -webkit-flex-shrink: 0; flex-shrink: 0; background: #ECEFF1; }
+.n-disp  { text-align: center; font-size: 38px; font-weight: 700; color: #1B4332; padding: 6px; letter-spacing: 8px; -webkit-flex-shrink: 0; flex-shrink: 0; min-height: 56px; background: #F4F7F4; }
 /* lista de palpites confirmados */
 .n-lista-wrap {
   -webkit-flex: 1; flex: 1;
   overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 10px 12px; background: #F5F5F5;
-  border-bottom: 1px solid #DDD;
-  font-size: 22px; font-weight: 700;
-  color: #1565C0; letter-spacing: 4px; line-height: 1.85;
+  padding: 12px 14px; background: #1B4332;
+  border-bottom: 2px solid #2E7D32;
+  font-size: 24px; font-weight: 700;
+  color: #D4A017; letter-spacing: 5px; line-height: 2;
   word-break: break-all;
 }
 .n-chip { display: none; }
 .n-chip-del { display: none; }
-/* Barra JBet: Prêmio / palpites / ✕ */
+/* Barra JBet: Prêmio / palpites / apagar */
 .jbet-info {
   display: -webkit-flex; display: flex;
   -webkit-align-items: center; align-items: center;
-  background: #c8c8c8; padding: 6px 10px;
-  border-top: 1px solid #aaa; -webkit-flex-shrink: 0; flex-shrink: 0;
+  background: #2D3748; padding: 6px 10px;
+  border-top: 1px solid #1B4332; -webkit-flex-shrink: 0; flex-shrink: 0;
   gap: 8px;
 }
 .jbi-box {
   display: -webkit-flex; display: flex;
   -webkit-flex-direction: column; flex-direction: column;
   -webkit-align-items: center; align-items: center;
-  background: #fff; border-radius: 5px;
-  padding: 2px 8px; min-width: 52px;
+  background: #1a2a1a; border-radius: 5px;
+  padding: 3px 10px; min-width: 52px;
 }
-.jbi-lbl { font-size: 10px; color: #666; font-weight: 600; text-transform: uppercase; }
-.jbi-val { font-size: 18px; font-weight: 700; color: #212121; line-height: 1.2; }
-.jbi-sep { font-size: 13px; color: #666; font-weight: 600; }
-.jbi-del { background: #E53935; border: none; color: #fff;
+.jbi-lbl { font-size: 10px; color: #A5D6A7; font-weight: 600; text-transform: uppercase; }
+.jbi-val { font-size: 18px; font-weight: 700; color: #D4A017; line-height: 1.2; }
+.jbi-sep { font-size: 13px; color: #555; font-weight: 600; }
+.jbi-del { background: #C62828; border: none; color: #fff;
   border-radius: 50%; width: 38px; height: 38px; font-size: 18px;
   cursor: pointer; display: -webkit-flex; display: flex;
   -webkit-align-items: center; align-items: center;
   -webkit-justify-content: center; justify-content: center; }
 .jbet-formula {
-  background: #E8F5E9; color: #2E7D32;
+  background: #E8F5E9; color: #1B4332;
   text-align: center; font-size: 13px; font-weight: 700;
   padding: 5px; -webkit-flex-shrink: 0; flex-shrink: 0;
   letter-spacing: .5px;
 }
 
-.teclado-row { display: -webkit-flex; display: flex; -webkit-flex-shrink: 0; flex-shrink: 0; height: 260px; }
+.teclado-row { display: -webkit-flex; display: flex; -webkit-flex-shrink: 0; flex-shrink: 0; height: 252px; }
 .numpad {
   -webkit-flex: 3; flex: 3;
   display: -webkit-flex; display: flex;
   -webkit-flex-wrap: wrap; flex-wrap: wrap;
-  background: #CCC; padding: 1px;
+  background: #2D3748; padding: 2px; gap: 2px;
 }
 .k {
-  width: 33.333%; background: #FAFAFA; border: 1px solid #CCC;
-  font-size: 22px; font-weight: 700; color: #212121; cursor: pointer;
+  width: calc(33.333% - 2px); background: #FFFFFF; border: none;
+  font-size: 24px; font-weight: 700; color: #1B4332; cursor: pointer;
   display: -webkit-flex; display: flex;
   -webkit-align-items: center; align-items: center;
   -webkit-justify-content: center; justify-content: center;
+  border-radius: 4px;
 }
-.k:active { background: #BDBDBD; }
-.k.empty  { background: #ECECEC; cursor: default; }
-.ks { -webkit-flex: 1; flex: 1; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; background: #CCC; padding: 1px; }
-.k-del { -webkit-flex: 1; flex: 1; background: #F57C00; border: none; color: #FFF; font-size: 24px; cursor: pointer; }
-.k-ok  { -webkit-flex: 3; flex: 3; background: #388E3C; border: none; color: #FFF; font-size: 30px; cursor: pointer; }
+.k:active { background: #C8E6C9; }
+.k.empty  { background: #3D4F5E; cursor: default; }
+.ks { -webkit-flex: 1; flex: 1; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; background: #2D3748; padding: 2px; gap: 2px; }
+.k-del { -webkit-flex: 1; flex: 1; background: #E53935; border: none; color: #FFF; font-size: 24px; cursor: pointer; border-radius: 4px; }
+.k-ok  { -webkit-flex: 3; flex: 3; background: #D4A017; border: none; color: #1B4332; font-size: 30px; font-weight: 900; cursor: pointer; border-radius: 4px; }
 .k-del:active, .k-ok:active { opacity: .85; }
-.k-ok.dim { opacity: .35; pointer-events: none; }
+.k-ok.dim { opacity: .3; pointer-events: none; }
 
 /* ══════════ TECLADO VALOR ══════════ */
-.v-mm   { text-align: center; color: #888; font-size: 13px; padding: 6px; -webkit-flex-shrink: 0; flex-shrink: 0; }
-.v-disp { text-align: center; font-size: 40px; font-weight: 700; color: #212121; padding: 4px; -webkit-flex-shrink: 0; flex-shrink: 0; min-height: 56px; }
+.v-mm   { text-align: center; color: #777; font-size: 12px; padding: 4px; -webkit-flex-shrink: 0; flex-shrink: 0; background: #ECEFF1; }
+.v-disp { display: none; }
 .modo-row {
   display: -webkit-flex; display: flex;
-  padding: 8px 12px; height: 72px; -webkit-flex-shrink: 0; flex-shrink: 0;
+  padding: 6px 10px; height: 58px; -webkit-flex-shrink: 0; flex-shrink: 0;
+  background: #F4F7F4; gap: 6px;
 }
 .btn-modo {
   -webkit-flex: 1; flex: 1; border: none; border-radius: 8px; cursor: pointer;
   font-size: 11px; font-weight: 700; color: #FFF; line-height: 1.6; padding: 4px;
 }
-.btn-modo + .btn-modo { margin-left: 8px; }
-.m-on  { background: #388E3C; }
+.m-on  { background: #1B4332; }
 .m-off { background: #9E9E9E; }
 
 /* ══════════ RESUMO ══════════ */
 .rsm-exts {
-  font-size: 12px; color: #555; padding: 8px 12px;
-  border-bottom: 1px solid #EEE; white-space: pre-wrap;
-  -webkit-flex-shrink: 0; flex-shrink: 0; background: #F9F9F9;
+  font-size: 12px; color: #555; padding: 7px 12px;
+  border-bottom: 1px solid #E0E0E0; white-space: pre-wrap;
+  -webkit-flex-shrink: 0; flex-shrink: 0; background: #ECEFF1;
 }
 .ap-item {
   display: -webkit-flex; display: flex;
   -webkit-align-items: center; align-items: center;
-  padding: 10px 12px; border-bottom: 1px solid #EEE;
+  padding: 10px 12px; border-bottom: 1px solid #E8F5E9;
+  border-left: 4px solid #2E7D32; background: #FFF; margin-bottom: 1px;
 }
 .ap-info { -webkit-flex: 1; flex: 1; font-size: 13px; color: #333; line-height: 1.8; }
-.ap-info strong { display: block; font-size: 14px; color: #1565C0; }
-.btn-del-ap { background: none; border: none; font-size: 24px; cursor: pointer; color: #E53935; padding: 2px 4px; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.ap-info strong { display: block; font-size: 14px; color: #1B4332; }
+.btn-del-ap { background: none; border: none; font-size: 24px; cursor: pointer; color: #C62828; padding: 2px 4px; -webkit-flex-shrink: 0; flex-shrink: 0; }
 .rsm-vz {
   -webkit-flex: 1; flex: 1;
   display: -webkit-flex; display: flex;
@@ -294,97 +297,104 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
   -webkit-justify-content: center; justify-content: center;
   color: #AAA; font-size: 15px; text-align: center; padding: 30px; line-height: 1.8;
 }
-.rsm-foot { display: -webkit-flex; display: flex; height: 56px; -webkit-flex-shrink: 0; flex-shrink: 0; }
-.rsm-foot button { -webkit-flex: 1; flex: 1; border: none; font-size: 15px; font-weight: 700; color: #FFF; cursor: pointer; }
+.rsm-foot { display: -webkit-flex; display: flex; height: 58px; -webkit-flex-shrink: 0; flex-shrink: 0; gap: 2px; padding: 4px; background: #1B4332; }
+.rsm-foot button { -webkit-flex: 1; flex: 1; border: none; font-size: 14px; font-weight: 700; color: #FFF; cursor: pointer; border-radius: 8px; }
 .rsm-foot button:active { opacity: .85; }
-.f-nb { background: #1565C0; }
-.f-ca { background: #E53935; }
-.f-fi { background: #388E3C; }
-.f-fi:disabled { background: #9E9E9E; }
+.f-nb { background: #2D6A4F; }
+.f-ca { background: #C62828; }
+.f-fi { background: #D4A017; color: #1B4332; font-size: 15px; }
+.f-fi:disabled { background: #9E9E9E; color: #FFF; }
 
 /* ══════════ DIALOG ══════════ */
 .dlg-bg {
   display: none; position: absolute;
-  top: 0; right: 0; bottom: 0; left: 0;  /* Chrome 83: sem inset */
-  background: rgba(0,0,0,.55);
+  top: 0; right: 0; bottom: 0; left: 0;
+  background: rgba(0,0,0,.6);
   -webkit-align-items: center; align-items: center;
   -webkit-justify-content: center; justify-content: center;
   z-index: 20;
 }
 .dlg-bg.on { display: -webkit-flex; display: flex; }
-.dlg { background: #FFF; border-radius: 8px; padding: 22px 20px 14px; margin: 24px; min-width: 260px; }
-.dlg-title { font-size: 17px; font-weight: 700; color: #212121; margin-bottom: 8px; }
+.dlg { background: #FFF; border-radius: 12px; padding: 22px 20px 14px; margin: 24px; min-width: 260px; border-top: 4px solid #D4A017; }
+.dlg-title { font-size: 17px; font-weight: 700; color: #1B4332; margin-bottom: 8px; }
 .dlg-msg   { font-size: 14px; color: #555; margin-bottom: 18px; line-height: 1.5; }
 .dlg-btns  { display: -webkit-flex; display: flex; -webkit-justify-content: flex-end; justify-content: flex-end; }
-.dlg-btns button { background: none; border: none; font-size: 14px; font-weight: 700; color: #1565C0; cursor: pointer; padding: 4px 8px; letter-spacing: .5px; text-transform: uppercase; }
+.dlg-btns button { background: none; border: none; font-size: 14px; font-weight: 700; color: #1B4332; cursor: pointer; padding: 4px 8px; letter-spacing: .5px; text-transform: uppercase; }
 
 /* ══════════ TICKET ══════════ */
-.ticket-dlg  { background: #FFF; border-radius: 8px; padding: 14px 14px 10px; margin: 12px; width: calc(100% - 24px); max-height: 92vh; overflow-y: auto; }
-.ticket-hdr  { text-align: center; font-size: 13px; color: #388E3C; font-weight: 700; margin-bottom: 8px; }
+.ticket-dlg  { background: #FFF; border-radius: 10px; padding: 14px 14px 10px; margin: 12px; width: calc(100% - 24px); max-height: 92vh; overflow-y: auto; }
+.ticket-hdr  { text-align: center; font-size: 14px; color: #1B4332; font-weight: 700; margin-bottom: 8px; }
 .ticket-pre  { font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.55; white-space: pre; background: #FAFAFA; border: 1px dashed #CCC; border-radius: 6px; padding: 10px 8px; margin-bottom: 10px; overflow-x: auto; color: #212121; }
 .ticket-btns { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 8px; }
-.btn-ok-tk   { width: 100%; height: 46px; background: #1565C0; color: #FFF; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
+.btn-ok-tk   { width: 100%; height: 46px; background: #1B4332; color: #FFF; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
 
 /* ══════════ BARRA JBET VALOR ══════════ */
 .jbet-val-bar {
   display: -webkit-flex; display: flex;
   -webkit-align-items: stretch; align-items: stretch;
-  background: #c8c8c8; border-bottom: 1px solid #aaa;
+  background: #1B4332; border-bottom: 2px solid #2E7D32;
   -webkit-flex-shrink: 0; flex-shrink: 0;
-  height: 70px;
+  height: 74px;
 }
 .jvb-box {
   display: -webkit-flex; display: flex;
   -webkit-flex-direction: column; flex-direction: column;
   -webkit-align-items: center; align-items: center;
   -webkit-justify-content: center; justify-content: center;
-  padding: 4px 8px; min-width: 70px;
+  padding: 4px 8px; min-width: 72px;
 }
-.jvb-lbl { font-size: 10px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: .4px; }
-.jvb-num { font-size: 22px; font-weight: 700; color: #1a1a1a; line-height: 1.15; }
-.jvb-sep { width: 1px; background: #aaa; margin: 8px 0; -webkit-align-self: stretch; align-self: stretch; }
-.jvb-ou  { font-size: 11px; color: #666; font-weight: 600; padding: 0 4px; -webkit-align-self: center; align-self: center; }
-.jvb-total { background: #3a3a3a; -webkit-flex: 1; flex: 1; }
-.jvb-total .jvb-lbl { color: #aaa; }
-.jvb-total .jvb-num { color: #A5D6A7; font-size: 24px; }
+.jvb-lbl { font-size: 10px; font-weight: 700; color: #A5D6A7; text-transform: uppercase; letter-spacing: .4px; }
+.jvb-num { font-size: 22px; font-weight: 700; color: #FFF; line-height: 1.15; }
+.jvb-sep { width: 1px; background: #2E7D32; margin: 8px 0; -webkit-align-self: stretch; align-self: stretch; }
+.jvb-ou  { font-size: 11px; color: #A5D6A7; font-weight: 600; padding: 0 4px; -webkit-align-self: center; align-self: center; }
+.jvb-total { background: #2D3748; -webkit-flex: 1; flex: 1; }
+.jvb-total .jvb-lbl { color: #A5D6A7; }
+.jvb-total .jvb-num { color: #D4A017; font-size: 26px; }
 .jvb-ok {
-  width: 62px; background: #1976D2; border: none; color: #FFF;
-  font-size: 30px; cursor: pointer; -webkit-flex-shrink: 0; flex-shrink: 0;
+  width: 66px; background: #D4A017; border: none; color: #1B4332;
+  font-size: 32px; font-weight: 900; cursor: pointer; -webkit-flex-shrink: 0; flex-shrink: 0;
   border-radius: 0;
 }
-.jvb-ok:active { background: #1565C0; }
+.jvb-ok:active { background: #B8860B; }
 .jbet-formula-v {
-  background: #E8F5E9; color: #2E7D32;
+  background: #E8F5E9; color: #1B4332;
   text-align: center; font-size: 13px; font-weight: 700;
-  padding: 6px 8px; -webkit-flex-shrink: 0; flex-shrink: 0;
+  padding: 5px 8px; -webkit-flex-shrink: 0; flex-shrink: 0;
   letter-spacing: .3px; border-bottom: 1px solid #C8E6C9;
+}
+.jbet-prize {
+  background: #FFF8E1; color: #E65100;
+  text-align: center; font-size: 13px; font-weight: 700;
+  padding: 4px 8px; -webkit-flex-shrink: 0; flex-shrink: 0;
+  border-bottom: 1px solid #FFE082; letter-spacing: .3px;
 }
 
 /* ══════════ LISTA JOGOS (RSM) ══════════ */
 .jogo-item {
   display: -webkit-flex; display: flex;
   -webkit-align-items: center; align-items: center;
-  padding: 9px 12px; border-bottom: 1px solid #E3F2FD;
-  background: #FFF;
+  padding: 9px 12px; border-bottom: 1px solid #E8F5E9;
+  background: #FFF; border-left: 4px solid #D4A017;
+  margin-bottom: 2px;
 }
 .jogo-info { -webkit-flex: 1; flex: 1; }
-.jogo-nome { font-size: 13px; font-weight: 700; color: #1565C0; }
+.jogo-nome { font-size: 13px; font-weight: 700; color: #1B4332; }
 .jogo-nums { font-size: 12px; color: #555; letter-spacing: 1px; }
-.jogo-form { font-size: 12px; color: #388E3C; font-weight: 600; margin-top: 1px; }
-.jogo-del  { background: none; border: none; color: #E53935; font-size: 20px; padding: 4px 6px; cursor: pointer; }
+.jogo-form { font-size: 12px; color: #2E7D32; font-weight: 600; margin-top: 1px; }
+.jogo-del  { background: none; border: none; color: #C62828; font-size: 20px; padding: 4px 6px; cursor: pointer; }
 .rsm-total-bar {
   display: -webkit-flex; display: flex;
   -webkit-justify-content: space-between; justify-content: space-between;
   -webkit-align-items: center; align-items: center;
-  background: #1565C0; color: #FFF;
+  background: #1B4332; color: #FFF;
   padding: 10px 14px; -webkit-flex-shrink: 0; flex-shrink: 0;
 }
-.rsm-total-bar .tot-lbl { font-size: 12px; opacity: .8; }
-.rsm-total-bar .tot-val { font-size: 22px; font-weight: 700; color: #A5D6A7; }
+.rsm-total-bar .tot-lbl { font-size: 12px; color: #A5D6A7; }
+.rsm-total-bar .tot-val { font-size: 24px; font-weight: 700; color: #D4A017; }
 .btn-add-jogo {
   display: block; width: calc(100% - 24px); margin: 8px 12px;
-  height: 44px; background: #1976D2; color: #FFF;
-  border: none; border-radius: 7px; font-size: 14px; font-weight: 700; cursor: pointer;
+  height: 44px; background: #2D6A4F; color: #FFF;
+  border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer;
 }
 </style>
 </head>
@@ -540,6 +550,8 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #FFF; }
 
   <!-- Fórmula viva: X a YP x R$V = R$T -->
   <div class="jbet-formula-v" id="jvb-formula">–</div>
+  <!-- Prêmio potencial -->
+  <div class="jbet-prize" id="jvb-prize" style="display:none"></div>
 
   <!-- Modo dividir/multiplicar compacto -->
   <div class="modo-row" style="height:52px">
@@ -835,6 +847,7 @@ function loadMods() {
           label: mod.label,
           multiplier: mod.multiplier,
           charge_multiplier: mod.charge_multiplier ? Number(mod.charge_multiplier) : 1,
+          factor: mod.factor ? Number(mod.factor) : 1,
           q: info.q, g: info.g, min: info.min
         };
         if (info.g) { setupGrupo(); go('s-grupo'); }
@@ -1077,25 +1090,26 @@ function vCom()  { if (st.val.indexOf(',') < 0) { st.val = (st.val || '0') + ','
 function vClr()  { st.val = ''; updV(); }
 function vDel()  { if (st.val.length) { st.val = st.val.slice(0,-1); updV(); } }
 function updV() {
-  var v     = parseFloat((st.val || '0').replace(',','.')) || 0;
-  var cm    = (st.mod && st.mod.charge_multiplier) ? Number(st.mod.charge_multiplier) : 1;
-  var min   = (st.mod && st.mod.min) ? st.mod.min : 1;
-  var mult  = (st.mod && st.mod.multiplier) ? Number(st.mod.multiplier) : null;
-  var count = (min > 1) ? 1 : ((st.entrada ? st.entrada.split(',').length : 1) || 1);
+  var v      = parseFloat((st.val || '0').replace(',','.')) || 0;
+  var cm     = (st.mod && st.mod.charge_multiplier) ? Number(st.mod.charge_multiplier) : 1;
+  var factor = (st.mod && st.mod.factor) ? Number(st.mod.factor) : 1;
+  var min    = (st.mod && st.mod.min) ? st.mod.min : 1;
+  var mult   = (st.mod && st.mod.multiplier) ? Number(st.mod.multiplier) : null;
+  var count  = (min > 1) ? 1 : ((st.entrada ? st.entrada.split(',').length : 1) || 1);
 
-  // ── Fórmula: TOTAL = N × P × M × VALOR × F ──────────────────────────────
-  // Dividir  : usuário entra com TOTAL → VALOR = TOTAL ÷ (N × P)
-  //            TOTAL exibido = v (o que o usuário quer pagar no total)
-  //            amount enviado à API = v ÷ count ÷ cm (API multiplica por cm)
-  // Multiplicar: usuário entra por palpite → TOTAL = v × count × cm
-  var unitDiv = (count > 0 && cm > 0) ? v / count / cm : 0; // valor por nº por prêmio
-  var totalDiv = v;                                           // total dividir = o que entrou
-  var totalMul = v * count * cm;                             // total multiplicar
+  // ── Fórmula: TOTAL = N × P × F × VALOR ───────────────────────────────────
+  // Dividir  : usuário entra com TOTAL → unit = TOTAL ÷ (N × P × F)
+  //            amount enviado à API = unit (API aplica P)
+  // Multiplicar: usuário entra por palpite → TOTAL = v × N × P
+  var unitDiv = (count > 0 && cm > 0 && factor > 0) ? v / count / cm / factor : 0;
+  var totalDiv = v;                   // total dividir = o que o usuário digitou
+  var totalMul = v * count * cm;      // total multiplicar
 
   var jvbPremio  = document.getElementById('jvb-premio');
   var jvbValor   = document.getElementById('jvb-valor');
   var jvbTotal   = document.getElementById('jvb-total');
   var jvbFormula = document.getElementById('jvb-formula');
+  var jvbPrize   = document.getElementById('jvb-prize');
 
   if (jvbPremio) jvbPremio.textContent = mult ? mult + 'x' : '–';
   if (jvbValor)  jvbValor.textContent  = (st.val || '0');
@@ -1110,13 +1124,12 @@ function updV() {
     var unitFmt = unitDiv.toFixed(2).replace('.',',');
     var f = '';
     if (st.modo === 'd') {
-      // Ex: "R$32,00 ÷ 10nº ÷ 10P = R$0,32/nº/P"
       f = 'R$ ' + vFmt;
-      if (count > 1) f += ' ÷ ' + count + 'nº';
-      if (cm > 1)    f += ' ÷ ' + cm + 'P';
+      if (count > 1)  f += ' ÷ ' + count + 'nº';
+      if (cm > 1)     f += ' ÷ ' + cm + 'P';
+      if (factor > 1) f += ' ÷ ' + factor + 'F';
       f += ' = R$ ' + unitFmt + '/un';
     } else {
-      // Ex: "10nº × R$1,00 × 10P = R$100,00"
       f = count > 1 ? count + 'nº × R$ ' + vFmt : 'R$ ' + vFmt;
       if (cm > 1) f += ' × ' + cm + 'P';
       f += ' = R$ ' + totalFmt;
@@ -1124,12 +1137,26 @@ function updV() {
     jvbFormula.textContent = f;
   }
 
+  // ── Prêmio potencial ──────────────────────────────────────────────────────
+  if (jvbPrize) {
+    if (mult && v > 0) {
+      // Para dividir: prêmio por nº = unitDiv × mult
+      // Para multiplicar: prêmio por nº = v × mult
+      var amtPerNum = st.modo === 'd' ? unitDiv : v;
+      var prize = amtPerNum * mult;
+      var prizeFmt = prize.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      jvbPrize.textContent = '🏆 Se ganhar 1 nº: R$ ' + prizeFmt;
+      jvbPrize.style.display = '';
+    } else {
+      jvbPrize.style.display = 'none';
+    }
+  }
+
   // v-disp oculto (compat)
   var vd = document.getElementById('v-disp');
   if (vd) vd.textContent = 'R$ ' + (st.val || '0');
 
   // Labels nos botões Dividir/Multiplicar
-  var unitFmt2 = unitDiv.toFixed(2).replace('.',',');
   var dtTxt = 'Total: R$ ' + totalDiv.toFixed(2).replace('.',',');
   if (count > 1 || cm > 1) dtTxt += ' (' + (count > 1 ? count + 'nº' : '') + (cm > 1 ? (count > 1 ? ' × ' : '') + cm + 'P' : '') + ')';
   var mtTxt = 'Total: R$ ' + totalMul.toFixed(2).replace('.',',');
@@ -1328,16 +1355,18 @@ function finBilhete() {
       bets.push(bet);
     } else {
       // Normal: cada número → bet separado
-      var nums  = a.entrada ? a.entrada.split(',') : [''];
-      var count = nums.length;
-      // Dividir: usuário entrou com TOTAL → amount por bet = TOTAL ÷ N ÷ cm
-      // (a API multiplica por cm → resultado = TOTAL/N × N = TOTAL ✓)
+      var nums   = a.entrada ? a.entrada.split(',') : [''];
+      var count  = nums.length;
+      var cm     = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
+      var factor = (a.mod && a.mod.factor) ? Number(a.mod.factor) : 1;
+      // Dividir: TOTAL ÷ N ÷ P ÷ F → amount por bet enviado à API
+      // (API aplica P e F → restaura TOTAL ✓)
       // Multiplicar: usuário entrou por palpite → amount = v direto
       var amtPer = a.modo === 'd'
-        ? Math.floor((a.valor / count / cm) * 10000) / 10000
+        ? Math.floor((a.valor / count / cm / factor) * 10000) / 10000
         : a.valor;
       var resto  = a.modo === 'd'
-        ? parseFloat((a.valor / cm - amtPer * count).toFixed(4))
+        ? parseFloat((a.valor / cm / factor - amtPer * count).toFixed(4))
         : 0;
       nums.forEach(function(num, idx) {
         var amt = amtPer + (idx === nums.length - 1 ? resto : 0);
@@ -1653,13 +1682,14 @@ function formatarComprovante(tid, total, apostas, res) {
       var cm  = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
       var min = (a.mod && a.mod.min) || 1;
       var cnt = (min > 1) ? 1 : (a.entrada ? a.entrada.split(',').length : 1);
+      var f   = (a.mod && a.mod.factor) ? Number(a.mod.factor) : 1;
       var v   = Number(a.valor);
       // total exibido:
       //   dividir     → v (é o total que o usuário quer pagar)
       //   multiplicar → v × cnt × cm
       var tot = a.modo === 'd' ? v : (v * cnt * cm);
       if (!mergedMap[bt]) {
-        mergedMap[bt] = { plabel: prizeLabel(a), valor: 0, totBet: 0, _cm: cm, _count: cnt };
+        mergedMap[bt] = { plabel: prizeLabel(a), valor: 0, totBet: 0, _cm: cm, _count: cnt, _factor: f };
         mergedOrder.push(bt);
       }
       mergedMap[bt].valor  += v;
@@ -1670,10 +1700,11 @@ function formatarComprovante(tid, total, apostas, res) {
       var m   = mergedMap[bt];
       var cm2 = mergedMap[bt]._cm || 1;
       var cnt = mergedMap[bt]._count || 1;
+      var fac = mergedMap[bt]._factor || 1;
       // cmLabel: "1 a 10P" em vez de "1/10P"
       var cmLbl = cm2 > 1 ? '1 a ' + cm2 + 'P' : '1P';
-      // Unidade = total ÷ (N × P) para exibição
-      var unit = (cnt > 0 && cm2 > 0) ? m.valor / cnt / cm2 : m.valor;
+      // Unidade = total ÷ (N × P × F) — F>1 ex: milhar e centena
+      var unit = (cnt > 0 && cm2 > 0 && fac > 0) ? m.valor / cnt / cm2 / fac : m.valor;
       t += cmLbl + ' x ' + brNum(unit) + ' = ' + brNum(m.valor) + '\n';
     });
 

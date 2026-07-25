@@ -861,6 +861,17 @@ function loadMods() {
   });
 }
 
+// Retorna fator implícito pelo bet_type quando a API não envia factor
+function factorFromBetType(bt) {
+  if (!bt) return 1;
+  var b = bt.toUpperCase().replace(/-/g,'_');
+  // Milhar e Centena cobre 2 posições (milhar + centena) → F=2
+  if (b.indexOf('MILHAR') >= 0 && b.indexOf('CENTENA') >= 0) return 2;
+  // Cercado cobre 3 posições → F=3
+  if (b.indexOf('CERCADO') >= 0) return 3;
+  return 1;
+}
+
 function modInfo(bt) {
   if (!bt) return { q: 2, g: false, min: 1 };
   var b = bt.toUpperCase().replace(/-/g, '_');
@@ -1092,7 +1103,9 @@ function vDel()  { if (st.val.length) { st.val = st.val.slice(0,-1); updV(); } }
 function updV() {
   var v      = parseFloat((st.val || '0').replace(',','.')) || 0;
   var cm     = (st.mod && st.mod.charge_multiplier) ? Number(st.mod.charge_multiplier) : 1;
-  var factor = (st.mod && st.mod.factor) ? Number(st.mod.factor) : 1;
+  var factor = (st.mod && st.mod.factor && st.mod.factor > 1)
+    ? Number(st.mod.factor)
+    : factorFromBetType(st.mod ? st.mod.bet_type : '');
   var min    = (st.mod && st.mod.min) ? st.mod.min : 1;
   var mult   = (st.mod && st.mod.multiplier) ? Number(st.mod.multiplier) : null;
   var count  = (min > 1) ? 1 : ((st.entrada ? st.entrada.split(',').length : 1) || 1);
@@ -1353,7 +1366,9 @@ function finBilhete() {
       var nums   = a.entrada ? a.entrada.split(',') : [''];
       var count  = nums.length;
       var cm     = (a.mod && a.mod.charge_multiplier) ? Number(a.mod.charge_multiplier) : 1;
-      var factor = (a.mod && a.mod.factor) ? Number(a.mod.factor) : 1;
+      var factor = (a.mod && a.mod.factor && a.mod.factor > 1)
+        ? Number(a.mod.factor)
+        : factorFromBetType(a.mod ? a.mod.bet_type : '');
       // Dividir: TOTAL ÷ N ÷ P ÷ F → amount por bet enviado à API
       // (API aplica P e F → restaura TOTAL ✓)
       // Multiplicar: usuário entrou por palpite → amount = v direto
@@ -1698,12 +1713,24 @@ function formatarComprovante(tid, total, apostas, res) {
 
     mergedOrder.forEach(function(bt) {
       var m   = mergedMap[bt];
-      var cm2  = mergedMap[bt]._cm || 1;
-      var cnt  = mergedMap[bt]._count || 1;
-      var fac  = mergedMap[bt]._factor || 1;
+      var cm2   = mergedMap[bt]._cm || 1;
+      var cnt   = mergedMap[bt]._count || 1;
+      var fac   = mergedMap[bt]._factor || 1;
       var modo2 = mergedMap[bt]._modo || 'd';
-      // cmLabel: "1 a 10P" em vez de "1/10P"
-      var cmLbl = cm2 > 1 ? '1 a ' + cm2 + 'P' : '1P';
+      // Extrai contagem real de prêmios P (evita "1 a 20P" quando cm=P×F)
+      var P = (function() {
+        var pl = m.plabel || '';
+        // "1 a 10 prêmios" ou "ao 10" → captura X
+        var ma = pl.match(/(?:a|ao)\s*(\d+)/i);
+        if (ma) return parseInt(ma[1]);
+        // "1/10P" → captura 10
+        var mb = pl.match(/\/(\d+)\s*[Pp]/);
+        if (mb) return parseInt(mb[1]);
+        // Fallback: divide cm pelo fator (API ou inferido do bet_type)
+        var fEff = fac > 1 ? fac : factorFromBetType(bt);
+        return fEff > 1 ? Math.round(cm2 / fEff) : cm2;
+      })();
+      var cmLbl = P > 1 ? '1 a ' + P + 'P' : '1P';
       // Multiplicar: unit = valor/palpite (a.valor), total = valor × N × cm
       // Dividir:     unit = total ÷ (N × P × F), total = valor digitado
       var unit, totalDisp;

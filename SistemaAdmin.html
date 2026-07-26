@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorte Ouro · Admin</title>
+<style>
+/* ── Reset ── */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;}
+body{background:#0F2318;color:#212121;min-height:100vh;}
+a{text-decoration:none;color:inherit;}
+button{cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+
+/* ── Login ── */
+#s-login{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0F2318;}
+.login-box{background:#fff;border-radius:14px;padding:36px 32px;width:340px;box-shadow:0 8px 32px rgba(0,0,0,.4);}
+.login-logo{text-align:center;margin-bottom:24px;}
+.login-logo .badge{display:inline-block;background:#1B4332;color:#D4A017;font-size:13px;font-weight:900;padding:10px 18px;border-radius:10px;border:2px solid #D4A017;letter-spacing:1px;}
+.login-title{font-size:20px;font-weight:700;color:#1B4332;text-align:center;margin-bottom:4px;}
+.login-sub{font-size:13px;color:#888;text-align:center;margin-bottom:24px;}
+.lbl{font-size:12px;font-weight:600;color:#555;margin-bottom:5px;display:block;}
+.inp{width:100%;height:46px;border:1.5px solid #C8E6C9;border-radius:8px;padding:0 12px;font-size:15px;outline:none;margin-bottom:14px;}
+.inp:focus{border-color:#1B4332;}
+.btn-login{width:100%;height:48px;background:#1B4332;color:#D4A017;border:none;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:1px;}
+.btn-login:hover{background:#2E7D32;}
+.login-err{color:#C62828;font-size:13px;text-align:center;min-height:20px;margin-top:8px;}
+
+/* ── Layout principal ── */
+#app{display:none;height:100vh;flex-direction:column;}
+#app.on{display:flex;}
+
+/* ── Topbar ── */
+.topbar{background:#1B4332;height:56px;display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.topbar .brand{font-size:16px;font-weight:900;color:#D4A017;letter-spacing:1px;margin-right:8px;}
+.topbar .sep{width:1px;height:28px;background:#2E7D32;}
+.topbar .user-info{font-size:13px;color:#A5D6A7;}
+.topbar .user-name{font-size:14px;font-weight:700;color:#FFF;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.btn-logout{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#FFF;padding:6px 14px;border-radius:6px;font-size:13px;}
+.btn-logout:hover{background:rgba(255,255,255,.2);}
+
+/* ── Body layout ── */
+.main-layout{display:flex;flex:1;overflow:hidden;}
+
+/* ── Sidebar ── */
+.sidebar{width:200px;background:#162F22;display:flex;flex-direction:column;flex-shrink:0;padding:12px 0;overflow-y:auto;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:12px 18px;font-size:14px;font-weight:600;color:#A5D6A7;cursor:pointer;border-left:3px solid transparent;transition:all .15s;}
+.nav-item:hover{background:rgba(255,255,255,.05);color:#FFF;}
+.nav-item.active{background:rgba(212,160,23,.1);color:#D4A017;border-left-color:#D4A017;}
+.nav-ico{font-size:18px;width:22px;text-align:center;}
+
+/* ── Content area ── */
+.content{flex:1;overflow-y:auto;background:#F0F4F1;padding:20px;}
+
+/* ── Section header ── */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.sec-title{font-size:20px;font-weight:700;color:#1B4332;}
+.btn-primary{background:#1B4332;color:#D4A017;border:none;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:700;}
+.btn-primary:hover{background:#2E7D32;}
+.btn-secondary{background:#fff;color:#1B4332;border:1.5px solid #1B4332;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;}
+.btn-danger{background:#C62828;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:13px;}
+.btn-sm{padding:5px 10px;font-size:12px;border-radius:6px;border:none;font-weight:600;}
+
+/* ── Cards dashboard ── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px;}
+.card{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-left:4px solid #D4A017;}
+.card.green{border-left-color:#2E7D32;}
+.card.red{border-left-color:#C62828;}
+.card.blue{border-left-color:#1565C0;}
+.card-lbl{font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
+.card-val{font-size:26px;font-weight:700;color:#1B4332;margin-top:4px;}
+.card-sub{font-size:12px;color:#999;margin-top:2px;}
+
+/* ── Tabela ── */
+.tbl-wrap{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden;margin-bottom:16px;}
+.tbl-toolbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #E8F5E9;}
+.tbl-search{flex:1;height:36px;border:1.5px solid #C8E6C9;border-radius:7px;padding:0 10px;font-size:13px;outline:none;}
+.tbl-search:focus{border-color:#1B4332;}
+table{width:100%;border-collapse:collapse;}
+th{background:#F1F8F1;text-align:left;font-size:12px;font-weight:700;color:#555;padding:10px 14px;text-transform:uppercase;letter-spacing:.4px;}
+td{padding:10px 14px;font-size:13px;color:#333;border-bottom:1px solid #F5F5F5;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#FAFFF9;}
+.badge{display:inline-block;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:700;}
+.badge.green{background:#E8F5E9;color:#2E7D32;}
+.badge.red{background:#FFEBEE;color:#C62828;}
+.badge.orange{background:#FFF3E0;color:#E65100;}
+.badge.blue{background:#E3F2FD;color:#1565C0;}
+.badge.gray{background:#F5F5F5;color:#757575;}
+
+/* ── Modal ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;align-items:center;justify-content:center;}
+.modal-bg.on{display:flex;}
+.modal{background:#fff;border-radius:14px;padding:28px 24px;width:460px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.3);}
+.modal-title{font-size:18px;font-weight:700;color:#1B4332;margin-bottom:20px;border-bottom:2px solid #C8E6C9;padding-bottom:10px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;height:42px;border:1.5px solid #C8E6C9;border-radius:8px;padding:0 12px;font-size:14px;outline:none;}
+.form-group input:focus,.form-group select:focus{border-color:#1B4332;}
+.form-group textarea{height:80px;padding:10px 12px;resize:vertical;}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:14px;border-top:1px solid #E0E0E0;}
+.btn-cancel{background:#F5F5F5;color:#555;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:4px;margin-bottom:16px;background:#E8F5E9;border-radius:10px;padding:4px;}
+.tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:600;color:#555;border-radius:7px;cursor:pointer;}
+.tab.active{background:#1B4332;color:#D4A017;}
+
+/* ── Charts placeholder ── */
+.chart-box{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:16px;}
+.chart-title{font-size:14px;font-weight:700;color:#1B4332;margin-bottom:12px;}
+.chart-area{height:180px;display:flex;align-items:flex-end;gap:6px;border-bottom:2px solid #E0E0E0;padding-bottom:4px;}
+.bar{flex:1;background:#2E7D32;border-radius:4px 4px 0 0;min-width:20px;position:relative;transition:height .3s;}
+.bar:hover{background:#1B4332;}
+.bar .bar-tip{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;color:#1B4332;white-space:nowrap;}
+.chart-labels{display:flex;gap:6px;margin-top:4px;}
+.chart-lbl{flex:1;text-align:center;font-size:10px;color:#888;}
+
+/* ── Alert / Toast ── */
+.toast{position:fixed;bottom:24px;right:24px;background:#1B4332;color:#D4A017;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.3);z-index:200;display:none;}
+.toast.on{display:block;}
+
+/* ── Loading ── */
+.loading{text-align:center;padding:40px;color:#888;font-size:14px;}
+.msg-err{color:#C62828;padding:20px;font-size:14px;}
+
+/* ── Filtros ── */
+.filtros{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+.filtros select,.filtros input[type=date]{height:36px;border:1.5px solid #C8E6C9;border-radius:7px;padding:0 10px;font-size:13px;outline:none;}
+.filtros select:focus,.filtros input:focus{border-color:#1B4332;}
+.btn-filtrar{background:#1B4332;color:#D4A017;border:none;border-radius:7px;height:36px;padding:0 16px;font-size:13px;font-weight:700;}
+
+/* ── Resultado input ── */
+.res-box{background:#FFF8E1;border:2px solid #D4A017;border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+.res-lbl{font-size:12px;font-weight:700;color:#E65100;margin-bottom:6px;text-transform:uppercase;}
+.res-nums{display:flex;gap:8px;flex-wrap:wrap;}
+.res-inp{width:72px;height:42px;border:2px solid #D4A017;border-radius:8px;text-align:center;font-size:18px;font-weight:700;color:#1B4332;outline:none;}
+.res-inp:focus{border-color:#1B4332;background:#F1F8E9;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="s-login">
+  <div class="login-box">
+    <div class="login-logo"><span class="badge">SORTE OURO</span></div>
+    <div class="login-title">Painel Administrativo</div>
+    <div class="login-sub">Acesso restrito a administradores</div>
+    <label class="lbl">Telefone</label>
+    <input class="inp" id="l-phone" type="tel" placeholder="Ex: 83999990001" autocomplete="off">
+    <label class="lbl">Senha</label>
+    <input class="inp" id="l-pass" type="password" placeholder="••••••••" autocomplete="off">
+    <button class="btn-login" onclick="doLogin()">ENTRAR</button>
+    <div class="login-err" id="l-err"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div id="app">
+  <!-- Topbar -->
+  <div class="topbar">
+    <span class="brand">SORTE OURO</span>
+    <div class="sep"></div>
+    <span class="user-info">Painel Admin · <span class="user-name" id="t-nome">–</span></span>
+    <div class="topbar-right">
+      <span style="font-size:13px;color:#A5D6A7" id="t-saldo"></span>
+      <button class="btn-logout" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="nav-item active" onclick="nav('dashboard')"><span class="nav-ico">📊</span>Dashboard</div>
+      <div class="nav-item" onclick="nav('vendedores')"><span class="nav-ico">👤</span>Vendedores</div>
+      <div class="nav-item" onclick="nav('sorteios')"><span class="nav-ico">🎯</span>Sorteios</div>
+      <div class="nav-item" onclick="nav('apostas')"><span class="nav-ico">🎫</span>Apostas</div>
+      <div class="nav-item" onclick="nav('relatorios')"><span class="nav-ico">💰</span>Relatórios</div>
+    </div>
+
+    <!-- Content -->
+    <div class="content" id="content">
+      <div class="loading">Carregando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAL GENÉRICO ═══════════════ -->
+<div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-title" id="modal-title">–</div>
+    <div id="modal-body"></div>
+    <div class="modal-foot" id="modal-foot">
+      <button class="btn-cancel" onclick="hideModal()">Cancelar</button>
+      <button class="btn-primary" id="modal-ok" onclick="modalOk()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════════════════
+var BASE = 'http://montedeourorecife.ddns.net';
+var st = { token: null, user: null, section: 'dashboard', modalCb: null };
+
+// ── API helper ────────────────────────────────────────────
+function api(method, path, body) {
+  var opts = {
+    method: method,
+    headers: { 'Content-Type': 'application/json' }
+  };
+  if (st.token) opts.headers['Authorization'] = 'Bearer ' + st.token;
+  if (body)     opts.body = JSON.stringify(body);
+  return fetch(BASE + path, opts).then(function(r) {
+    if (r.status === 401) { doLogout(); throw new Error('Sessão expirada'); }
+    return r.json().then(function(d) {
+      if (!r.ok) throw new Error(d.detail || d.error || JSON.stringify(d));
+      return d;
+    });
+  });
+}
+
+function toArray(d) {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (d.results && Array.isArray(d.results)) return d.results;
+  return [];
+}
+
+function brMoney(n) {
+  return 'R$ ' + Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtDate(s) {
+  if (!s) return '–';
+  var d = new Date(s);
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// ── Toast ─────────────────────────────────────────────────
+function toast(msg, ok) {
+  var el = document.getElementById('toast');
+  el.textContent = (ok ? '✅ ' : '❌ ') + msg;
+  el.style.background = ok ? '#1B4332' : '#C62828';
+  el.style.color = ok ? '#D4A017' : '#FFF';
+  el.classList.add('on');
+  setTimeout(function() { el.classList.remove('on'); }, 3000);
+}
+
+// ── Modal ─────────────────────────────────────────────────
+function showModal(title, bodyHtml, okCb, okLabel) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHtml;
+  document.getElementById('modal-ok').textContent = okLabel || 'Salvar';
+  st.modalCb = okCb;
+  document.getElementById('modal-bg').classList.add('on');
+}
+function hideModal() { document.getElementById('modal-bg').classList.remove('on'); st.modalCb = null; }
+function closeModal(e) { if (e.target === document.getElementById('modal-bg')) hideModal(); }
+function modalOk() { if (st.modalCb) st.modalCb(); }
+
+// ════════════════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════════════════
+function doLogin() {
+  var phone = document.getElementById('l-phone').value.trim();
+  var pass  = document.getElementById('l-pass').value;
+  var errEl = document.getElementById('l-err');
+  errEl.textContent = '';
+  if (!phone || !pass) { errEl.textContent = 'Preencha todos os campos.'; return; }
+
+  api('POST', '/api/auth/login/', { phone: phone, password: pass })
+    .then(function(d) {
+      if (!d.access) throw new Error('Token não retornado');
+      st.token = d.access;
+      st.user  = d.user || {};
+      document.getElementById('t-nome').textContent = st.user.name || st.user.username || phone;
+      document.getElementById('s-login').style.display = 'none';
+      document.getElementById('app').classList.add('on');
+      nav('dashboard');
+    })
+    .catch(function(e) { errEl.textContent = e.message; });
+}
+
+function doLogout() {
+  st.token = null; st.user = null;
+  document.getElementById('app').classList.remove('on');
+  document.getElementById('s-login').style.display = 'flex';
+  document.getElementById('l-pass').value = '';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && document.getElementById('s-login').style.display !== 'none') doLogin();
+});
+
+// ════════════════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ════════════════════════════════════════════════════════════
+function nav(sec) {
+  st.section = sec;
+  document.querySelectorAll('.nav-item').forEach(function(el, i) {
+    var secs = ['dashboard','vendedores','sorteios','apostas','relatorios'];
+    el.classList.toggle('active', secs[i] === sec);
+  });
+  var sections = { dashboard: renderDashboard, vendedores: renderVendedores, sorteios: renderSorteios, apostas: renderApostas, relatorios: renderRelatorios };
+  if (sections[sec]) sections[sec]();
+}
+
+function setContent(html) { document.getElementById('content').innerHTML = html; }
+
+// ════════════════════════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════════════════════════
+function renderDashboard() {
+  setContent('<div class="loading">Carregando dashboard...</div>');
+
+  var dt = today();
+  // Carrega draws e bets em paralelo
+  Promise.all([
+    api('GET', '/api/draws/'),
+    api('GET', '/api/bets/?date=' + dt + '&page_size=500').catch(function() { return []; }),
+    api('GET', '/api/users/?role=operator&page_size=200').catch(function() { return []; })
+  ]).then(function(res) {
+    var draws   = toArray(res[0]);
+    var bets    = toArray(res[1]);
+    var vendors = toArray(res[2]);
+
+    var totalVal  = bets.reduce(function(s, b) { return s + Number(b.amount || 0); }, 0);
+    var pendentes = draws.filter(function(d) { return !d.result && d.status !== 'cancelled'; }).length;
+    var ativos    = vendors.filter(function(v) { return v.is_active; }).length;
+
+    // Agrupa apostas por hora para o gráfico
+    var hoursMap = {};
+    bets.forEach(function(b) {
+      var h = b.created_at ? new Date(b.created_at).getHours() : 0;
+      hoursMap[h] = (hoursMap[h] || 0) + Number(b.amount || 0);
+    });
+    var hours = [];
+    for (var h = 6; h <= 22; h++) hours.push({ h: h, v: hoursMap[h] || 0 });
+    var maxV = Math.max.apply(null, hours.map(function(x) { return x.v; })) || 1;
+
+    var barsHtml = hours.map(function(x) {
+      var pct = Math.round((x.v / maxV) * 100);
+      var tip = x.v > 0 ? 'R$' + x.v.toFixed(0) : '';
+      return '<div class="bar" style="height:' + Math.max(pct, 2) + '%"><span class="bar-tip">' + tip + '</span></div>';
+    }).join('');
+    var lblsHtml = hours.map(function(x) {
+      return '<div class="chart-lbl">' + x.h + 'h</div>';
+    }).join('');
+
+    // Últimas apostas
+    var lastBets = bets.slice(-8).reverse();
+    var betRows = lastBets.length
+      ? lastBets.map(function(b) {
+          return '<tr><td>' + (b.id||'–') + '</td><td>' + (b.numbers||'–') + '</td>' +
+            '<td>' + (b.bet_type||'–') + '</td><td>' + brMoney(b.amount) + '</td>' +
+            '<td><span class="badge ' + (b.status==='won'?'green':b.status==='lost'?'red':'orange') + '">' + (b.status||'pendente') + '</span></td>' +
+            '<td>' + fmtDate(b.created_at) + '</td></tr>';
+        }).join('')
+      : '<tr><td colspan="6" style="text-align:center;color:#aaa">Nenhuma aposta hoje</td></tr>';
+
+    setContent(
+      '<div class="sec-hdr"><div class="sec-title">📊 Dashboard · ' + new Date().toLocaleDateString('pt-BR') + '</div></div>' +
+      '<div class="cards">' +
+        '<div class="card green"><div class="card-lbl">Arrecadado Hoje</div><div class="card-val">' + brMoney(totalVal) + '</div><div class="card-sub">' + bets.length + ' apostas</div></div>' +
+        '<div class="card"><div class="card-lbl">Sorteios Pendentes</div><div class="card-val">' + pendentes + '</div><div class="card-sub">aguardando resultado</div></div>' +
+        '<div class="card blue"><div class="card-lbl">Vendedores Ativos</div><div class="card-val">' + ativos + '</div><div class="card-sub">de ' + vendors.length + ' cadastrados</div></div>' +
+        '<div class="card"><div class="card-lbl">Extrações Hoje</div><div class="card-val">' + draws.length + '</div><div class="card-sub">total do dia</div></div>' +
+      '</div>' +
+      '<div class="chart-box"><div class="chart-title">Arrecadação por Hora — Hoje</div>' +
+        '<div class="chart-area">' + barsHtml + '</div>' +
+        '<div class="chart-labels">' + lblsHtml + '</div>' +
+      '</div>' +
+      '<div class="tbl-wrap"><div class="tbl-toolbar"><b style="font-size:14px;color:#1B4332">Últimas Apostas</b></div>' +
+        '<table><thead><tr><th>#</th><th>Números</th><th>Modalidade</th><th>Valor</th><th>Status</th><th>Hora</th></tr></thead>' +
+        '<tbody>' + betRows + '</tbody></table></div>'
+    );
+  }).catch(function(e) {
+    setContent('<div class="msg-err">Erro ao carregar dashboard: ' + e.message + '</div>');
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// VENDEDORES
+// ════════════════════════════════════════════════════════════
+var vendedoresCache = [];
+
+function renderVendedores() {
+  setContent('<div class="loading">Carregando vendedores...</div>');
+  api('GET', '/api/users/?page_size=200').then(function(d) {
+    vendedoresCache = toArray(d);
+    renderVendedoresTable(vendedoresCache);
+  }).catch(function(e) {
+    setContent('<div class="msg-err">Erro: ' + e.message + '<br><small>Verifique se o endpoint /api/users/ existe e permite acesso admin.</small></div>');
+  });
+}
+
+function renderVendedoresTable(list) {
+  var rows = list.length
+    ? list.map(function(v) {
+        var ativo = v.is_active !== false;
+        return '<tr>' +
+          '<td>' + (v.id||'–') + '</td>' +
+          '<td><b>' + (v.name || v.username || '–') + '</b></td>' +
+          '<td>' + (v.phone || '–') + '</td>' +
+          '<td>' + (v.region || v.region_id || '–') + '</td>' +
+          '<td>' + brMoney(v.balance) + '</td>' +
+          '<td><span class="badge ' + (ativo ? 'green' : 'red') + '">' + (ativo ? 'Ativo' : 'Bloqueado') + '</span></td>' +
+          '<td style="display:flex;gap:6px">' +
+            '<button class="btn-sm" style="background:#1B4332;color:#D4A017" onclick="editarVendedor(' + v.id + ')">Editar</button>' +
+            '<button class="btn-sm" style="background:#1565C0;color:#fff" onclick="adicionarSaldo(' + v.id + ',\'' + (v.name||v.username||'') + '\')">Saldo</button>' +
+            '<button class="btn-sm" style="background:' + (ativo?'#C62828':'#2E7D32') + ';color:#fff" onclick="toggleAtivo(' + v.id + ',' + !ativo + ')">' + (ativo?'Bloquear':'Ativar') + '</button>' +
+          '</td></tr>';
+      }).join('')
+    : '<tr><td colspan="7" style="text-align:center;color:#aaa">Nenhum vendedor encontrado</td></tr>';
+
+  setContent(
+    '<div class="sec-hdr"><div class="sec-title">👤 Vendedores</div>' +
+      '<button class="btn-primary" onclick="novoVendedor()">+ Novo Vendedor</button>' +
+    '</div>' +
+    '<div class="tbl-wrap">' +
+      '<div class="tbl-toolbar"><input class="tbl-search" placeholder="Buscar por nome ou telefone..." oninput="filtrarVendedores(this.value)"></div>' +
+      '<table><thead><tr><th>#</th><th>Nome</th><th>Telefone</th><th>Região</th><th>Saldo</th><th>Status</th><th>Ações</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody></table></div>'
+  );
+}
+
+function filtrarVendedores(q) {
+  q = q.toLowerCase();
+  var filtered = vendedoresCache.filter(function(v) {
+    return (v.name || v.username || '').toLowerCase().includes(q) || (v.phone || '').includes(q);
+  });
+  renderVendedoresTable(filtered);
+}
+
+function novoVendedor() {
+  showModal('Novo Vendedor',
+    '<div class="form-row">' +
+      '<div class="form-group"><label>Nome</label><input id="fv-nome" placeholder="Nome completo"></div>' +
+      '<div class="form-group"><label>Telefone</label><input id="fv-phone" type="tel" placeholder="83999990001"></div>' +
+    '</div>' +
+    '<div class="form-row">' +
+      '<div class="form-group"><label>Senha</label><input id="fv-pass" type="password" placeholder="Mínimo 6 caracteres"></div>' +
+      '<div class="form-group"><label>Região</label><input id="fv-reg" placeholder="ID da região"></div>' +
+    '</div>' +
+    '<div class="form-group"><label>Saldo inicial (R$)</label><input id="fv-saldo" type="number" step="0.01" min="0" value="0"></div>',
+    function() {
+      var body = {
+        name: document.getElementById('fv-nome').value,
+        phone: document.getElementById('fv-phone').value,
+        password: document.getElementById('fv-pass').value,
+        region_id: document.getElementById('fv-reg').value,
+        balance: parseFloat(document.getElementById('fv-saldo').value) || 0
+      };
+      api('POST', '/api/users/', body).then(function() {
+        hideModal(); toast('Vendedor criado!', true); renderVendedores();
+      }).catch(function(e) { toast(e.message); });
+    }, 'Criar Vendedor'
+  );
+}
+
+function editarVendedor(id) {
+  var v = vendedoresCache.find(function(x) { return x.id == id; });
+  if (!v) return;
+  showModal('Editar Vendedor — ' + (v.name || v.username),
+    '<div class="form-row">' +
+      '<div class="form-group"><label>Nome</label><input id="ev-nome" value="' + (v.name||'') + '"></div>' +
+      '<div class="form-group"><label>Telefone</label><input id="ev-phone" value="' + (v.phone||'') + '"></div>' +
+    '</div>' +
+    '<div class="form-row">' +
+      '<div class="form-group"><label>Nova Senha (deixe vazio para manter)</label><input id="ev-pass" type="password" placeholder="Nova senha"></div>' +
+      '<div class="form-group"><label>Região</label><input id="ev-reg" value="' + (v.region_id||v.region||'') + '"></div>' +
+    '</div>',
+    function() {
+      var body = { name: document.getElementById('ev-nome').value, phone: document.getElementById('ev-phone').value, region_id: document.getElementById('ev-reg').value };
+      var p = document.getElementById('ev-pass').value;
+      if (p) body.password = p;
+      api('PATCH', '/api/users/' + id + '/', body).then(function() {
+        hideModal(); toast('Vendedor atualizado!', true); renderVendedores();
+      }).catch(function(e) { toast(e.message); });
+    }
+  );
+}
+
+function adicionarSaldo(id, nome) {
+  showModal('Adicionar Saldo — ' + nome,
+    '<div class="form-group"><label>Valor a adicionar (R$)</label><input id="s-val" type="number" step="0.01" min="0.01" placeholder="Ex: 100,00" autofocus></div>' +
+    '<div class="form-group"><label>Observação</label><input id="s-obs" placeholder="Opcional"></div>',
+    function() {
+      var val = parseFloat(document.getElementById('s-val').value);
+      if (!val || val <= 0) { toast('Valor inválido'); return; }
+      api('POST', '/api/users/' + id + '/add_balance/', { amount: val, note: document.getElementById('s-obs').value })
+        .then(function() { hideModal(); toast('Saldo adicionado!', true); renderVendedores(); })
+        .catch(function(e) { toast(e.message); });
+    }, 'Adicionar'
+  );
+}
+
+function toggleAtivo(id, ativo) {
+  if (!confirm((ativo ? 'Ativar' : 'Bloquear') + ' este vendedor?')) return;
+  api('PATCH', '/api/users/' + id + '/', { is_active: ativo }).then(function() {
+    toast((ativo ? 'Vendedor ativado!' : 'Vendedor bloqueado!'), true); renderVendedores();
+  }).catch(function(e) { toast(e.message); });
+}
+
+// ════════════════════════════════════════════════════════════
+// SORTEIOS
+// ════════════════════════════════════════════════════════════
+var sorteiosCache = [];
+
+function renderSorteios() {
+  setContent('<div class="loading">Carregando sorteios...</div>');
+  api('GET', '/api/draws/?page_size=100').then(function(d) {
+    sorteiosCache = toArray(d);
+    renderSorteiosTable();
+  }).catch(function(e) {
+    setContent('<div class="msg-err">Erro: ' + e.message + '</div>');
+  });
+}
+
+function renderSorteiosTable() {
+  var rows = sorteiosCache.length
+    ? sorteiosCache.map(function(d) {
+        var hasResult = d.result && (typeof d.result === 'object' ? Object.keys(d.result).length > 0 : true);
+        var statusBadge = hasResult
+          ? '<span class="badge green">Resultado inserido</span>'
+          : '<span class="badge orange">Aguardando</span>';
+        return '<tr>' +
+          '<td>' + (d.id||'–') + '</td>' +
+          '<td><b>' + (d.title||d.name||'–') + '</b></td>' +
+          '<td>' + fmtDate(d.draw_time || d.scheduled_at) + '</td>' +
+          '<td>' + (d.region || d.region_id || '–') + '</td>' +
+          '<td>' + statusBadge + '</td>' +
+          '<td style="display:flex;gap:6px">' +
+            '<button class="btn-sm" style="background:#D4A017;color:#1B4332;font-weight:700" onclick="inserirResultado(' + d.id + ',\'' + (d.title||d.name||'') + '\')">Resultado</button>' +
+            '<button class="btn-sm" style="background:#1B4332;color:#D4A017" onclick="verApostas(' + d.id + ')">Ver Apostas</button>' +
+          '</td></tr>';
+      }).join('')
+    : '<tr><td colspan="6" style="text-align:center;color:#aaa">Nenhum sorteio</td></tr>';
+
+  setContent(
+    '<div class="sec-hdr"><div class="sec-title">🎯 Sorteios</div>' +
+      '<button class="btn-primary" onclick="novoSorteio()">+ Novo Sorteio</button>' +
+    '</div>' +
+    '<div class="tbl-wrap"><table>' +
+      '<thead><tr><th>#</th><th>Nome</th><th>Data/Hora</th><th>Região</th><th>Status</th><th>Ações</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody></table></div>'
+  );
+}
+
+function novoSorteio() {
+  var now = new Date();
+  var dtLocal = now.toISOString().slice(0,16);
+  showModal('Novo Sorteio',
+    '<div class="form-group"><label>Nome / Título</label><input id="ns-nome" placeholder="Ex: AVAL PE 09:00 HS"></div>' +
+    '<div class="form-row">' +
+      '<div class="form-group"><label>Data e Hora</label><input id="ns-dt" type="datetime-local" value="' + dtLocal + '"></div>' +
+      '<div class="form-group"><label>ID da Região</label><input id="ns-reg" placeholder="ID da região"></div>' +
+    '</div>' +
+    '<div class="form-group"><label>Valor máx. por número (R$)</label><input id="ns-max" type="number" step="0.01" value="500"></div>',
+    function() {
+      var body = {
+        title: document.getElementById('ns-nome').value,
+        draw_time: document.getElementById('ns-dt').value,
+        region_id: document.getElementById('ns-reg').value,
+        max_value_per_number: parseFloat(document.getElementById('ns-max').value) || 500
+      };
+      api('POST', '/api/draws/', body).then(function() {
+        hideModal(); toast('Sorteio criado!', true); renderSorteios();
+      }).catch(function(e) { toast(e.message); });
+    }, 'Criar Sorteio'
+  );
+}
+
+function inserirResultado(id, nome) {
+  // 5 prêmios (milhar de 4 dígitos)
+  var inps = [1,2,3,4,5].map(function(i) {
+    return '<div style="text-align:center"><div style="font-size:11px;font-weight:700;color:#888;margin-bottom:4px">' + i + 'º</div>' +
+      '<input class="res-inp" maxlength="4" id="r-' + i + '" placeholder="0000" oninput="this.value=this.value.replace(/[^0-9]/g,\'\');if(this.value.length==4&&' + i + '<5)document.getElementById(\'r-' + (i+1) + '\').focus();"></div>';
+  }).join('');
+
+  showModal('Inserir Resultado — ' + nome,
+    '<div class="res-box"><div class="res-lbl">🏆 Milhar (5 prêmios)</div><div class="res-nums">' + inps + '</div></div>' +
+    '<p style="font-size:12px;color:#888">Digite os 5 números premiados. Centenas e dezenas são derivadas automaticamente.</p>',
+    function() {
+      var numeros = [];
+      for (var i = 1; i <= 5; i++) {
+        var n = document.getElementById('r-' + i).value.trim();
+        if (!n || n.length !== 4) { toast('Digite todos os 5 prêmios com 4 dígitos'); return; }
+        numeros.push(n);
+      }
+      api('POST', '/api/draws/' + id + '/result/', { winning_numbers: numeros })
+        .then(function() { hideModal(); toast('Resultado inserido!', true); renderSorteios(); })
+        .catch(function(e) { toast(e.message); });
+    }, 'Confirmar Resultado'
+  );
+}
+
+function verApostas(drawId) {
+  nav('apostas');
+  setTimeout(function() {
+    var sel = document.getElementById('f-draw');
+    if (sel) { sel.value = drawId; filtrarApostas(); }
+  }, 600);
+}
+
+// ════════════════════════════════════════════════════════════
+// APOSTAS
+// ════════════════════════════════════════════════════════════
+var apostasCache = [];
+var drawsListCache = [];
+
+function renderApostas() {
+  setContent('<div class="loading">Carregando...</div>');
+  Promise.all([
+    api('GET', '/api/draws/?page_size=200'),
+    api('GET', '/api/bets/?date=' + today() + '&page_size=300')
+  ]).then(function(res) {
+    drawsListCache = toArray(res[0]);
+    apostasCache   = toArray(res[1]);
+    renderApostasView();
+  }).catch(function(e) {
+    setContent('<div class="msg-err">Erro: ' + e.message + '</div>');
+  });
+}
+
+function renderApostasView() {
+  var drawOpts = '<option value="">Todos os sorteios</option>' +
+    drawsListCache.map(function(d) { return '<option value="' + d.id + '">' + (d.title||d.name) + '</option>'; }).join('');
+
+  var rows = apostasCache.length
+    ? apostasCache.map(function(b) {
+        return '<tr>' +
+          '<td>' + (b.id||'–') + '</td>' +
+          '<td>' + (b.numbers||'–') + '</td>' +
+          '<td>' + (b.bet_type||'–') + '</td>' +
+          '<td>' + brMoney(b.amount) + '</td>' +
+          '<td>' + (b.vendor_name || b.operator_name || '–') + '</td>' +
+          '<td><span class="badge ' + (b.status==='won'?'green':b.status==='lost'?'red':'orange') + '">' + (b.status||'pendente') + '</span></td>' +
+          '<td>' + fmtDate(b.created_at) + '</td>' +
+          '<td><button class="btn-sm" style="background:#C62828;color:#fff" onclick="cancelarAposta(' + b.id + ')">Cancelar</button></td>' +
+        '</tr>';
+      }).join('')
+    : '<tr><td colspan="8" style="text-align:center;color:#aaa">Nenhuma aposta encontrada</td></tr>';
+
+  var html =
+    '<div class="sec-hdr"><div class="sec-title">🎫 Apostas</div></div>' +
+    '<div class="filtros">' +
+      '<select id="f-draw">' + drawOpts + '</select>' +
+      '<input type="date" id="f-dt" value="' + today() + '">' +
+      '<select id="f-status"><option value="">Todos os status</option><option value="pending">Pendente</option><option value="won">Ganhou</option><option value="lost">Perdeu</option><option value="cancelled">Cancelado</option></select>' +
+      '<button class="btn-filtrar" onclick="filtrarApostas()">Filtrar</button>' +
+      '<span style="font-size:13px;color:#555" id="f-count">' + apostasCache.length + ' apostas</span>' +
+    '</div>' +
+    '<div class="tbl-wrap"><table>' +
+      '<thead><tr><th>#</th><th>Números</th><th>Modalidade</th><th>Valor</th><th>Vendedor</th><th>Status</th><th>Data</th><th>Ação</th></tr></thead>' +
+      '<tbody id="apostas-tbody">' + rows + '</tbody>' +
+    '</table></div>';
+
+  setContent(html);
+}
+
+function filtrarApostas() {
+  var drawId = (document.getElementById('f-draw') || {}).value || '';
+  var dt     = (document.getElementById('f-dt') || {}).value || today();
+  var status = (document.getElementById('f-status') || {}).value || '';
+  setContent('<div class="loading">Filtrando...</div>');
+  var qs = '?page_size=500';
+  if (dt)     qs += '&date=' + dt;
+  if (drawId) qs += '&draw_id=' + drawId;
+  if (status) qs += '&status=' + status;
+  api('GET', '/api/bets/' + qs).then(function(d) {
+    apostasCache = toArray(d);
+    renderApostasView();
+    // restore filters
+    if (drawId) document.getElementById('f-draw').value = drawId;
+    if (dt)     document.getElementById('f-dt').value = dt;
+    if (status) document.getElementById('f-status').value = status;
+    document.getElementById('f-count').textContent = apostasCache.length + ' apostas';
+  }).catch(function(e) { toast(e.message); });
+}
+
+function cancelarAposta(id) {
+  if (!confirm('Cancelar aposta #' + id + '?')) return;
+  api('POST', '/api/bets/' + id + '/cancel/').then(function() {
+    toast('Aposta cancelada', true); filtrarApostas();
+  }).catch(function(e) { toast(e.message); });
+}
+
+// ════════════════════════════════════════════════════════════
+// RELATÓRIOS
+// ════════════════════════════════════════════════════════════
+var relTab = 'diario';
+
+function renderRelatorios() {
+  setContent(
+    '<div class="sec-hdr"><div class="sec-title">💰 Relatórios Financeiros</div></div>' +
+    '<div class="tabs">' +
+      '<div class="tab active" onclick="setRelTab(\'diario\',this)">Diário</div>' +
+      '<div class="tab" onclick="setRelTab(\'semanal\',this)">Semanal</div>' +
+      '<div class="tab" onclick="setRelTab(\'vendedor\',this)">Por Vendedor</div>' +
+    '</div>' +
+    '<div id="rel-content"><div class="loading">Carregando...</div></div>'
+  );
+  loadRel('diario');
+}
+
+function setRelTab(tab, el) {
+  relTab = tab;
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+  loadRel(tab);
+}
+
+function loadRel(tab) {
+  var rc = document.getElementById('rel-content');
+  if (!rc) return;
+  rc.innerHTML = '<div class="loading">Carregando...</div>';
+
+  if (tab === 'diario') {
+    // Últimos 7 dias
+    var promises = [];
+    var labels = [];
+    for (var i = 6; i >= 0; i--) {
+      var d = new Date(); d.setDate(d.getDate() - i);
+      var ds = d.toISOString().slice(0,10);
+      labels.push(d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' }));
+      promises.push(api('GET', '/api/bets/?date=' + ds + '&page_size=500').catch(function() { return []; }));
+    }
+    Promise.all(promises).then(function(res) {
+      var rows = res.map(function(bets, i) {
+        var arr   = toArray(bets);
+        var total = arr.reduce(function(s, b) { return s + Number(b.amount||0); }, 0);
+        var ganhos = arr.filter(function(b) { return b.status === 'won'; }).reduce(function(s, b) { return s + Number(b.prize_amount || b.amount || 0); }, 0);
+        var lucro = total - ganhos;
+        return '<tr>' +
+          '<td>' + labels[i] + '</td>' +
+          '<td>' + arr.length + '</td>' +
+          '<td>' + brMoney(total) + '</td>' +
+          '<td>' + brMoney(ganhos) + '</td>' +
+          '<td><b style="color:' + (lucro>=0?'#2E7D32':'#C62828') + '">' + brMoney(lucro) + '</b></td>' +
+        '</tr>';
+      }).join('');
+
+      rc.innerHTML =
+        '<div class="tbl-wrap"><table>' +
+        '<thead><tr><th>Data</th><th>Apostas</th><th>Arrecadado</th><th>Prêmios Pagos</th><th>Lucro</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table></div>';
+    }).catch(function(e) { rc.innerHTML = '<div class="msg-err">' + e.message + '</div>'; });
+
+  } else if (tab === 'semanal') {
+    var dt = today();
+    api('GET', '/api/bets/?page_size=1000').then(function(d) {
+      var bets = toArray(d);
+      // Agrupa por modalidade
+      var map = {};
+      bets.forEach(function(b) {
+        var k = b.bet_type || 'outros';
+        if (!map[k]) map[k] = { count: 0, total: 0 };
+        map[k].count++;
+        map[k].total += Number(b.amount || 0);
+      });
+      var rows = Object.keys(map).sort(function(a,b) { return map[b].total - map[a].total; })
+        .map(function(k) {
+          return '<tr><td>' + k + '</td><td>' + map[k].count + '</td><td>' + brMoney(map[k].total) + '</td>' +
+            '<td>' + (bets.length ? Math.round(map[k].count/bets.length*100) : 0) + '%</td></tr>';
+        }).join('');
+      rc.innerHTML =
+        '<div class="tbl-wrap"><table>' +
+        '<thead><tr><th>Modalidade</th><th>Apostas</th><th>Arrecadado</th><th>% do Total</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table></div>';
+    }).catch(function(e) { rc.innerHTML = '<div class="msg-err">' + e.message + '</div>'; });
+
+  } else if (tab === 'vendedor') {
+    api('GET', '/api/users/?page_size=200').then(function(d) {
+      var vendors = toArray(d);
+      var rows = vendors.map(function(v) {
+        return '<tr>' +
+          '<td>' + (v.name||v.username||'–') + '</td>' +
+          '<td>' + (v.phone||'–') + '</td>' +
+          '<td>' + brMoney(v.balance) + '</td>' +
+          '<td>' + (v.total_bets || '–') + '</td>' +
+          '<td>' + brMoney(v.total_amount) + '</td>' +
+          '<td><button class="btn-sm" style="background:#1B4332;color:#D4A017" onclick="adicionarSaldo(' + v.id + ',\'' + (v.name||v.username||'') + '\')">+ Saldo</button></td>' +
+        '</tr>';
+      }).join('');
+      rc.innerHTML =
+        '<div class="tbl-wrap"><table>' +
+        '<thead><tr><th>Vendedor</th><th>Telefone</th><th>Saldo</th><th>Total Apostas</th><th>Total Arrecadado</th><th>Ação</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table></div>';
+    }).catch(function(e) { rc.innerHTML = '<div class="msg-err">' + e.message + '</div>'; });
+  }
+}
+</script>
+</body>
+</html>

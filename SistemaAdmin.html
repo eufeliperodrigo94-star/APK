@@ -24,7 +24,8 @@ input,select,textarea{font-family:inherit;}
 .inp:focus{border-color:#1B4332;}
 .btn-login{width:100%;height:48px;background:#1B4332;color:#D4A017;border:none;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:1px;}
 .btn-login:hover{background:#2E7D32;}
-.login-err{color:#C62828;font-size:13px;text-align:center;min-height:20px;margin-top:8px;}
+.login-err{color:#C62828;font-size:12px;text-align:center;min-height:20px;margin-top:10px;white-space:pre-line;line-height:1.5;background:#FFF5F5;border-radius:6px;padding:6px 8px;display:none;}
+.login-err.on{display:block;}
 
 /* ── Layout principal ── */
 #app{display:none;height:100vh;flex-direction:column;}
@@ -152,8 +153,12 @@ tr:hover td{background:#FAFFF9;}
     <input class="inp" id="l-phone" type="tel" placeholder="Ex: 83999990001" autocomplete="off">
     <label class="lbl">Senha</label>
     <input class="inp" id="l-pass" type="password" placeholder="••••••••" autocomplete="off">
-    <button class="btn-login" onclick="doLogin()">ENTRAR</button>
+    <button class="btn-login" id="btn-login" onclick="doLogin()">ENTRAR</button>
     <div class="login-err" id="l-err"></div>
+    <div style="margin-top:12px;font-size:11px;color:#aaa;text-align:center">
+      Para evitar erros de CORS, acesse via:<br>
+      <b style="color:#1B4332">http://montedeourorecife.ddns.net/admin/</b>
+    </div>
   </div>
 </div>
 
@@ -204,7 +209,7 @@ tr:hover td{background:#FAFFF9;}
 
 <script>
 // ════════════════════════════════════════════════════════════
-// CONFIG
+// CONFIG — altere BASE se o servidor mudar
 // ════════════════════════════════════════════════════════════
 var BASE = 'http://montedeourorecife.ddns.net';
 var st = { token: null, user: null, section: 'dashboard', modalCb: null };
@@ -213,16 +218,27 @@ var st = { token: null, user: null, section: 'dashboard', modalCb: null };
 function api(method, path, body) {
   var opts = {
     method: method,
-    headers: { 'Content-Type': 'application/json' }
+    mode: 'cors',
+    credentials: 'omit',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
   };
   if (st.token) opts.headers['Authorization'] = 'Bearer ' + st.token;
   if (body)     opts.body = JSON.stringify(body);
   return fetch(BASE + path, opts).then(function(r) {
     if (r.status === 401) { doLogout(); throw new Error('Sessão expirada'); }
-    return r.json().then(function(d) {
-      if (!r.ok) throw new Error(d.detail || d.error || JSON.stringify(d));
+    if (r.status === 204) return {};
+    return r.text().then(function(txt) {
+      var d = {};
+      try { d = JSON.parse(txt); } catch(e) { if (!r.ok) throw new Error('Resposta inválida: ' + txt.slice(0,120)); return {}; }
+      if (!r.ok) throw new Error(d.detail || d.error || d.message || JSON.stringify(d));
       return d;
     });
+  }).catch(function(e) {
+    // TypeError: Failed to fetch = CORS ou servidor offline
+    if (e instanceof TypeError && e.message.indexOf('fetch') >= 0) {
+      throw new Error('Sem conexão com o servidor (' + BASE + ').\nVerifique se o servidor está online e permite CORS (Access-Control-Allow-Origin: *).');
+    }
+    throw e;
   });
 }
 
@@ -272,24 +288,44 @@ function modalOk() { if (st.modalCb) st.modalCb(); }
 // ════════════════════════════════════════════════════════════
 // AUTH
 // ════════════════════════════════════════════════════════════
+function showErr(msg) {
+  var el = document.getElementById('l-err');
+  el.textContent = msg;
+  el.classList.add('on');
+}
+function hideErr() {
+  var el = document.getElementById('l-err');
+  el.textContent = '';
+  el.classList.remove('on');
+}
+
 function doLogin() {
   var phone = document.getElementById('l-phone').value.trim();
   var pass  = document.getElementById('l-pass').value;
-  var errEl = document.getElementById('l-err');
-  errEl.textContent = '';
-  if (!phone || !pass) { errEl.textContent = 'Preencha todos os campos.'; return; }
+  var btn   = document.getElementById('btn-login');
+  hideErr();
+  if (!phone || !pass) { showErr('Preencha telefone e senha.'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Aguarde...';
 
   api('POST', '/api/auth/login/', { phone: phone, password: pass })
     .then(function(d) {
-      if (!d.access) throw new Error('Token não retornado');
-      st.token = d.access;
+      // Aceita access ou token (compatibilidade)
+      var tk = d.access || d.token;
+      if (!tk) throw new Error('Token não retornado. Resposta: ' + JSON.stringify(d));
+      st.token = tk;
       st.user  = d.user || {};
       document.getElementById('t-nome').textContent = st.user.name || st.user.username || phone;
       document.getElementById('s-login').style.display = 'none';
       document.getElementById('app').classList.add('on');
       nav('dashboard');
     })
-    .catch(function(e) { errEl.textContent = e.message; });
+    .catch(function(e) {
+      showErr(e.message);
+      btn.disabled = false;
+      btn.textContent = 'ENTRAR';
+    });
 }
 
 function doLogout() {
